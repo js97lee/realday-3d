@@ -7,7 +7,6 @@ const orderEstimate = document.querySelector("#orderEstimate");
 const orderSummaryText = document.querySelector("#orderSummaryText");
 const orderBreakdown = document.querySelector("#orderBreakdown");
 const orderModelFile = document.querySelector("#orderModelFile");
-const simulationFile = document.querySelector("#simulationFile");
 const simulationPanel = document.querySelector("#simulationPanel");
 const orderForm = document.querySelector("#orderForm");
 const qrCode = document.querySelector("#qrCode");
@@ -30,7 +29,7 @@ function setInitialSummary() {
   orderFileName.textContent = file;
   orderEstimateMeta.textContent = `${param("material")} · ${param("quantity", "1")}개 · 최대 ${param("maxSize", "-")}mm`;
   orderEstimate.textContent = estimate;
-  orderSummaryText.textContent = `${file} 조건으로 주문을 이어갑니다. 실제 출력 가능 여부는 접수 후 최종 확인됩니다.`;
+  orderSummaryText.textContent = `${file} 조건으로 선결제 주문을 이어갑니다. 실제 출력 가능 여부는 접수 후 최종 확인됩니다.`;
 
   orderBreakdown.innerHTML = [
     ["소재", param("material")],
@@ -39,15 +38,22 @@ function setInitialSummary() {
     ["적층", param("layer")],
     ["서포트", param("support")],
     ["다색 출력", param("multicolor")],
+    ["결제", "선결제 필요"],
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
     .join("");
+
+  if (file !== "미업로드") {
+    updateSimulation({ name: file, size: 0 }, true);
+  }
 }
 
-function updateSimulation(file) {
+function updateSimulation(file, fromQuote = false) {
   simulationPanel.classList.add("is-ready");
-  simulationPanel.querySelector("strong").textContent = "시뮬레이션 파일 확인됨";
-  simulationPanel.querySelector("span").textContent = formatFile(file);
+  simulationPanel.querySelector("strong").textContent = "출력 시뮬레이션 자동 생성됨";
+  simulationPanel.querySelector("span").textContent = fromQuote
+    ? `${file.name} · 견적 조건 기반 자동 확인`
+    : `${formatFile(file)} · 업로드 파일 기반 자동 확인`;
 }
 
 function fallbackQr(text) {
@@ -114,11 +120,7 @@ orderModelFile.addEventListener("change", () => {
   if (!file) return;
   orderFileName.textContent = file.name;
   orderEstimateMeta.textContent = formatFile(file);
-});
-
-simulationFile.addEventListener("change", () => {
-  const [file] = simulationFile.files;
-  if (file) updateSimulation(file);
+  updateSimulation(file);
 });
 
 orderForm.addEventListener("submit", (event) => {
@@ -127,6 +129,7 @@ orderForm.addEventListener("submit", (event) => {
   const serial = String(Math.floor(Math.random() * 9000) + 1000);
   const orderId = `BF-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${serial}`;
   pickupCode.textContent = orderId;
+  orderSummaryText.textContent = "선결제 요청과 출력 주문서가 생성되었습니다. 출력 완료 후 24시간 방문 수령 QR로 픽업합니다.";
   renderQr(orderId);
 });
 
