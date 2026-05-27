@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="leftShade" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#05070d" stop-opacity="0.98"/>
+      <stop offset="0.45" stop-color="#05070d" stop-opacity="0.9"/>
+      <stop offset="0.78" stop-color="#05070d" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#05070d" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="bottomShade" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#05070d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#05070d" stop-opacity="0.84"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <image href="hero-3d-print.png" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1200" height="630" fill="url(#leftShade)"/>
+  <rect width="1200" height="630" fill="url(#bottomShade)"/>
+  <rect x="0" y="0" width="1200" height="630" fill="none" stroke="#246bfe" stroke-opacity="0.38" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="72" y="72" width="86" height="86" rx="18" fill="#246bfe"/>
+    <text x="115" y="126" text-anchor="middle"
+      font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">BF</text>
+  </g>
+
+  <text x="184" y="125"
+    font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" fill="#ffffff">BlueForge</text>
+
+  <text x="76" y="244"
+    font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" fill="#0ea5ff"
+    letter-spacing="1">Bambu Lab FDM 3D Printing Quote</text>
+
+  <text x="74" y="355"
+    font-family="'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif"
+    font-size="62" font-weight="800" fill="#ffffff">모델 파일만 있으면</text>
+  <text x="74" y="431"
+    font-family="'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif"
+    font-size="62" font-weight="800" fill="#ffffff">출력 견적까지 바로.</text>
+
+  <g>
+    <rect x="76" y="500" width="226" height="54" rx="10" fill="#246bfe"/>
+    <text x="189" y="535" text-anchor="middle"
+      font-family="'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif"
+      font-size="22" font-weight="800" fill="#ffffff">3D 파일 업로드</text>
+    <rect x="318" y="500" width="238" height="54" rx="10" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="437" y="535" text-anchor="middle"
+      font-family="'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif"
+      font-size="22" font-weight="800" fill="#ffffff">견적 확인</text>
+  </g>
+</svg>
