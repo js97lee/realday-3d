@@ -247,9 +247,9 @@ function makeSupportPreview(THREE, object) {
   const min = box.min;
   const group = new THREE.Group();
   const supportMaterial = new THREE.MeshStandardMaterial({
-    color: 0xf15a24,
+    color: 0x246bfe,
     transparent: true,
-    opacity: 0.58,
+    opacity: 0.5,
     roughness: 0.7,
   });
 
@@ -287,8 +287,8 @@ function applyPreviewMode() {
   }
   simulationHint.textContent =
     previewMode === "print"
-      ? "*버튼을 눌러 실제 출력 모델을 확인해 보세요. 실제 출력 시 서포트가 추가될 수 있습니다."
-      : "원본 모델을 빌드 플레이트 위에서 확인 중입니다.";
+      ? "웹사이트가 업로드된 파일을 기준으로 실제 출력 상태를 자동 시뮬레이션합니다."
+      : "업로드된 원본 모델을 빌드 플레이트 위에서 자동 렌더링하고 있습니다.";
 }
 
 async function loadPreviewObject(file, extension, THREE) {
@@ -330,7 +330,7 @@ async function renderModelPreview(file) {
   if (["step", "stp"].includes(extension)) {
     setPreviewStatus(
       "STEP 파일은 주문 접수 후 변환 단계에서 확인합니다.",
-      "변환 필요",
+      "STEP/STP는 서버 변환이 필요합니다.",
       "브라우저 미리보기는 STL, OBJ, 3MF, AMF 파일을 지원합니다.",
       "is-error"
     );
@@ -342,7 +342,7 @@ async function renderModelPreview(file) {
     return;
   }
 
-  setPreviewStatus("모델을 불러오는 중입니다.", "로딩", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
+  setPreviewStatus("모델을 불러오는 중입니다.", "3D 파일을 웹에서 자동 렌더링 중입니다.", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
 
   try {
     const THREE = await import("three");
@@ -464,7 +464,7 @@ function clearUploadedFile() {
   resultFileCheck.textContent = "3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.";
   setPreviewStatus(
     "파일을 올리면 모델이 표시됩니다.",
-    "파일을 올리면 웹사이트가 자동으로 출력 미리보기를 생성합니다.",
+    "STL, OBJ, 3MF, AMF 파일은 웹에서 바로 자동 렌더링됩니다.",
     "STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다."
   );
   calculate();

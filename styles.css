@@ -455,14 +455,14 @@ article {
 }
 
 .model-preview .result-label {
-  color: #f15a24;
+  color: var(--blue);
 }
 
 .model-preview-actions {
   display: inline-flex;
   overflow: hidden;
   background: #fff;
-  border: 2px solid #f15a24;
+  border: 2px solid var(--blue);
   border-radius: 999px;
 }
 
@@ -472,7 +472,7 @@ article {
   padding: 0 18px;
   background: transparent;
   border: 0;
-  color: #f15a24;
+  color: var(--blue);
   cursor: pointer;
   font: inherit;
   font-size: 14px;
@@ -481,7 +481,7 @@ article {
 }
 
 .model-preview-actions button.is-active {
-  background: #f15a24;
+  background: var(--blue);
   color: #fff;
 }
 
@@ -491,7 +491,7 @@ article {
   padding: 10px 14px;
   background: #fff;
   border-radius: 8px;
-  color: #f15a24;
+  color: var(--blue);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.45;
@@ -499,7 +499,7 @@ article {
 }
 
 .simulation-hint.is-ready {
-  color: #f15a24;
+  color: var(--blue);
 }
 
 .simulation-hint.is-error {
@@ -511,7 +511,7 @@ article {
   min-height: 420px;
   overflow: hidden;
   background: #f7f7f7;
-  border: 3px solid #f15a24;
+  border: 3px solid var(--blue);
   border-radius: 8px;
 }
 
@@ -534,7 +534,7 @@ article {
 }
 
 .model-placeholder span {
-  color: #f15a24;
+  color: var(--blue);
   font-size: 40px;
 }
 
@@ -576,7 +576,7 @@ article {
 }
 
 .simulation-details #detailPrice {
-  color: #f15a24;
+  color: var(--blue);
   font-size: 22px;
   font-weight: 800;
 }
