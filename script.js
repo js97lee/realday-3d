@@ -33,11 +33,21 @@ const maxSizeInput = document.querySelector("#maxSize");
 const modelStage = document.querySelector("#modelStage");
 const modelPlaceholder = document.querySelector("#modelPlaceholder");
 const modelPreviewTitle = document.querySelector("#modelPreviewTitle");
-const modelPreviewBadge = document.querySelector("#modelPreviewBadge");
 const modelPreviewNote = document.querySelector("#modelPreviewNote");
+const simulationHint = document.querySelector("#simulationHint");
+const previewModeButtons = document.querySelectorAll("[data-preview-mode]");
+const detailMaterial = document.querySelector("#detailMaterial");
+const detailWeight = document.querySelector("#detailWeight");
+const detailSize = document.querySelector("#detailSize");
+const detailInfill = document.querySelector("#detailInfill");
+const detailQuality = document.querySelector("#detailQuality");
+const detailTime = document.querySelector("#detailTime");
+const detailQuantity = document.querySelector("#detailQuantity");
+const detailPrice = document.querySelector("#detailPrice");
 
 let uploadedFileInfo = null;
 let modelViewer = null;
+let previewMode = "source";
 
 const formatter = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -128,6 +138,7 @@ function applyFileInfo(info) {
   fileName.textContent = info.name;
   fileMeta.textContent = info.meta;
   resultFileCheck.textContent = info.resultText;
+  detailSize.textContent = info.dimensions || "-";
 
   if (info.maxDimension) {
     maxSizeInput.value = Math.ceil(info.maxDimension);
@@ -136,11 +147,25 @@ function applyFileInfo(info) {
   calculate();
 }
 
-function setPreviewStatus(title, badge, note, state = "") {
+function setPreviewStatus(title, hint, note, state = "") {
   modelPreviewTitle.textContent = title;
-  modelPreviewBadge.textContent = badge;
-  modelPreviewBadge.className = state;
+  simulationHint.textContent = hint;
+  simulationHint.className = `simulation-hint ${state}`;
   modelPreviewNote.textContent = note;
+}
+
+function updatePreviewModeButtons() {
+  previewModeButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.previewMode === previewMode);
+  });
+}
+
+function setPreviewMode(mode) {
+  previewMode = mode;
+  updatePreviewModeButtons();
+  if (modelViewer) {
+    applyPreviewMode();
+  }
 }
 
 function resetModelViewer() {
@@ -163,20 +188,41 @@ function resetModelViewer() {
   modelPlaceholder.hidden = false;
 }
 
+function makeBuildPlate(THREE) {
+  const plate = new THREE.Group();
+  const size = 256;
+  const grid = new THREE.GridHelper(size, 32, 0xa9a9a9, 0xb8b8b8);
+  grid.rotation.x = Math.PI / 2;
+  grid.position.z = 0;
+  plate.add(grid);
+
+  const borderGeometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-size / 2, -size / 2, 0.01),
+    new THREE.Vector3(size / 2, -size / 2, 0.01),
+    new THREE.Vector3(size / 2, size / 2, 0.01),
+    new THREE.Vector3(-size / 2, size / 2, 0.01),
+    new THREE.Vector3(-size / 2, -size / 2, 0.01),
+  ]);
+  const border = new THREE.Line(borderGeometry, new THREE.LineBasicMaterial({ color: 0x9ca3af }));
+  plate.add(border);
+  return plate;
+}
+
 function fitObjectToView(THREE, object, camera, controls) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   object.position.sub(center);
+  object.position.z += size.z / 2;
 
   const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const distance = maxDimension * 1.85;
-  camera.position.set(distance, distance * 0.72, distance);
+  const distance = Math.max(180, maxDimension * 2.6);
+  camera.position.set(distance * 0.8, -distance * 1.05, distance * 0.75);
   camera.near = distance / 100;
   camera.far = distance * 100;
   camera.updateProjectionMatrix();
 
-  controls.target.set(0, 0, 0);
+  controls.target.set(0, 0, Math.max(4, size.z / 3));
   controls.update();
 }
 
@@ -184,15 +230,65 @@ function preparePreviewObject(THREE, object) {
   object.traverse((child) => {
     if (child.isMesh) {
       child.material = new THREE.MeshStandardMaterial({
-        color: 0x77b7ff,
-        roughness: 0.46,
-        metalness: 0.08,
+        color: 0xd7d7d7,
+        roughness: 0.58,
+        metalness: 0.02,
       });
       child.castShadow = true;
       child.receiveShadow = true;
     }
   });
   return object;
+}
+
+function makeSupportPreview(THREE, object) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const min = box.min;
+  const group = new THREE.Group();
+  const supportMaterial = new THREE.MeshStandardMaterial({
+    color: 0xf15a24,
+    transparent: true,
+    opacity: 0.58,
+    roughness: 0.7,
+  });
+
+  const radius = Math.max(1.6, Math.min(size.x, size.y) / 28);
+  const height = Math.max(6, size.z * 0.72);
+  const positions = [
+    [min.x + size.x * 0.28, min.y + size.y * 0.28],
+    [min.x + size.x * 0.62, min.y + size.y * 0.45],
+    [min.x + size.x * 0.45, min.y + size.y * 0.68],
+  ];
+
+  positions.forEach(([x, y]) => {
+    const geometry = new THREE.CylinderGeometry(radius, radius * 0.72, height, 8);
+    const support = new THREE.Mesh(geometry, supportMaterial);
+    support.rotation.x = Math.PI / 2;
+    support.position.set(x, y, height / 2);
+    group.add(support);
+  });
+
+  return group;
+}
+
+function applyPreviewMode() {
+  if (!modelViewer) return;
+  modelViewer.object.traverse((child) => {
+    if (child.isMesh) {
+      child.material.color.set(previewMode === "source" ? 0xd7d7d7 : 0x77b7ff);
+      child.material.wireframe = previewMode === "source";
+      child.material.opacity = 1;
+      child.material.transparent = false;
+    }
+  });
+  if (modelViewer.supportGroup) {
+    modelViewer.supportGroup.visible = previewMode === "print" && valueOf("support");
+  }
+  simulationHint.textContent =
+    previewMode === "print"
+      ? "*버튼을 눌러 실제 출력 모델을 확인해 보세요. 실제 출력 시 서포트가 추가될 수 있습니다."
+      : "원본 모델을 빌드 플레이트 위에서 확인 중입니다.";
 }
 
 async function loadPreviewObject(file, extension, THREE) {
@@ -252,11 +348,11 @@ async function renderModelPreview(file) {
     const THREE = await import("three");
     const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050914);
+    scene.background = new THREE.Color(0xf7f7f7);
 
     const width = modelStage.clientWidth || 720;
-    const height = modelStage.clientHeight || 320;
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 10000);
+    const height = modelStage.clientHeight || 420;
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
@@ -266,18 +362,22 @@ async function renderModelPreview(file) {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    controls.screenSpacePanning = true;
 
-    scene.add(new THREE.HemisphereLight(0xd9ecff, 0x111827, 2.6));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 2.4));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
     keyLight.position.set(4, 6, 7);
     scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x246bfe, 1.8);
+    const rimLight = new THREE.DirectionalLight(0x93c5fd, 1.1);
     rimLight.position.set(-5, 2, -4);
     scene.add(rimLight);
+    scene.add(makeBuildPlate(THREE));
 
     const object = preparePreviewObject(THREE, await loadPreviewObject(file, extension, THREE));
     scene.add(object);
     fitObjectToView(THREE, object, camera, controls);
+    const supportGroup = makeSupportPreview(THREE, object);
+    scene.add(supportGroup);
     modelPlaceholder.hidden = true;
 
     const resize = () => {
@@ -290,15 +390,16 @@ async function renderModelPreview(file) {
 
     const animate = () => {
       controls.update();
-      object.rotation.z += 0.002;
       renderer.render(scene, camera);
       modelViewer.frame = requestAnimationFrame(animate);
     };
 
-    modelViewer = { scene, renderer, controls, resize, frame: 0 };
+    modelViewer = { scene, renderer, controls, resize, frame: 0, object, supportGroup };
+    applyPreviewMode();
     window.addEventListener("resize", resize);
     animate();
-    setPreviewStatus(file.name, "미리보기", "마우스로 회전하고 휠로 확대할 수 있습니다.", "is-ready");
+    setPreviewStatus(file.name, "자동 시뮬레이션 생성 완료", "마우스로 회전하고 휠로 확대할 수 있습니다.", "is-ready");
+    applyPreviewMode();
   } catch (error) {
     resetModelViewer();
     setPreviewStatus(
@@ -340,6 +441,7 @@ async function inspectModelFile(file) {
         meta: `${baseInfo} · 삼각형 ${bounds.triangles.toLocaleString("ko-KR")}개 · ${dimensions}`,
         resultText: `STL 파일 확인됨. 대략 치수는 ${dimensions}이며 최대 치수를 견적기에 반영했습니다.`,
         maxDimension,
+        dimensions,
       });
       return;
     }
@@ -362,7 +464,7 @@ function clearUploadedFile() {
   resultFileCheck.textContent = "3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.";
   setPreviewStatus(
     "파일을 올리면 모델이 표시됩니다.",
-    "대기",
+    "파일을 올리면 웹사이트가 자동으로 출력 미리보기를 생성합니다.",
     "STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다."
   );
   calculate();
@@ -397,6 +499,13 @@ function calculate() {
   const total = Math.max(15000, roundPrice(subtotal + rushCost));
 
   estimate.textContent = formatter.format(total);
+  detailMaterial.textContent = material.label;
+  detailWeight.textContent = `${weight}g`;
+  detailInfill.textContent = support ? "보통" : "낮음";
+  detailQuality.textContent = layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal";
+  detailTime.textContent = `${hours}시간`;
+  detailQuantity.textContent = `${quantity}개`;
+  detailPrice.textContent = formatter.format(total);
   note.textContent =
     maxSize > 256
       ? "256mm를 넘는 모델은 분할 출력 검토가 필요합니다."
@@ -454,6 +563,12 @@ function calculate() {
 
 form.addEventListener("input", calculate);
 form.addEventListener("change", calculate);
+form.addEventListener("change", () => {
+  applyPreviewMode();
+});
+previewModeButtons.forEach((button) => {
+  button.addEventListener("click", () => setPreviewMode(button.dataset.previewMode));
+});
 modelFile.addEventListener("change", () => {
   const [file] = modelFile.files;
   if (file) {

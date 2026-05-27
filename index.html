@@ -142,17 +142,33 @@
             <section class="model-preview" aria-label="3D 모델 미리보기">
               <div class="model-preview-head">
                 <div>
-                  <span class="result-label">모델 미리보기</span>
+                  <span class="result-label">자동 출력 시뮬레이션</span>
                   <strong id="modelPreviewTitle">파일을 올리면 모델이 표시됩니다.</strong>
                 </div>
-                <span id="modelPreviewBadge">대기</span>
+                <div class="model-preview-actions" aria-label="시뮬레이션 보기 전환">
+                  <button type="button" class="is-active" data-preview-mode="source">원본 모델</button>
+                  <button type="button" data-preview-mode="print">실제 출력</button>
+                </div>
               </div>
+              <p class="simulation-hint" id="simulationHint">
+                파일을 올리면 웹사이트가 자동으로 출력 미리보기를 생성합니다.
+              </p>
               <div class="model-stage" id="modelStage">
                 <div class="model-placeholder" id="modelPlaceholder">
                   <span>▧</span>
                   <strong>3D 파일 대기</strong>
-                  <p>STL, OBJ, 3MF, AMF 파일은 브라우저에서 바로 미리볼 수 있습니다.</p>
+                  <p>STL, OBJ, 3MF, AMF 파일은 업로드 즉시 빌드 플레이트 위에 표시됩니다.</p>
                 </div>
+              </div>
+              <div class="simulation-details" aria-label="파일 상세 정보">
+                <div><span>재료</span><strong id="detailMaterial">PLA</strong></div>
+                <div><span>무게</span><strong id="detailWeight">80g</strong></div>
+                <div><span>크기(XYZ)</span><strong id="detailSize">-</strong></div>
+                <div><span>채움정도</span><strong id="detailInfill">보통</strong></div>
+                <div><span>Print Quality</span><strong id="detailQuality">Normal</strong></div>
+                <div><span>출력 소요시간</span><strong id="detailTime">6시간</strong></div>
+                <div><span>수량</span><strong id="detailQuantity">1개</strong></div>
+                <div><span>예상 가격</span><strong id="detailPrice">-</strong></div>
               </div>
               <p class="model-preview-note" id="modelPreviewNote">
                 STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다.
