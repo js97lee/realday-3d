@@ -30,8 +30,14 @@ const fileMeta = document.querySelector("#fileMeta");
 const clearFile = document.querySelector("#clearFile");
 const resultFileCheck = document.querySelector("#resultFileCheck");
 const maxSizeInput = document.querySelector("#maxSize");
+const modelStage = document.querySelector("#modelStage");
+const modelPlaceholder = document.querySelector("#modelPlaceholder");
+const modelPreviewTitle = document.querySelector("#modelPreviewTitle");
+const modelPreviewBadge = document.querySelector("#modelPreviewBadge");
+const modelPreviewNote = document.querySelector("#modelPreviewNote");
 
 let uploadedFileInfo = null;
+let modelViewer = null;
 
 const formatter = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -130,6 +136,180 @@ function applyFileInfo(info) {
   calculate();
 }
 
+function setPreviewStatus(title, badge, note, state = "") {
+  modelPreviewTitle.textContent = title;
+  modelPreviewBadge.textContent = badge;
+  modelPreviewBadge.className = state;
+  modelPreviewNote.textContent = note;
+}
+
+function resetModelViewer() {
+  if (modelViewer) {
+    cancelAnimationFrame(modelViewer.frame);
+    window.removeEventListener("resize", modelViewer.resize);
+    modelViewer.controls?.dispose();
+    modelViewer.renderer?.dispose();
+    modelViewer.scene?.traverse((object) => {
+      object.geometry?.dispose?.();
+      if (Array.isArray(object.material)) {
+        object.material.forEach((material) => material.dispose?.());
+      } else {
+        object.material?.dispose?.();
+      }
+    });
+    modelViewer = null;
+  }
+  modelStage.querySelector("canvas")?.remove();
+  modelPlaceholder.hidden = false;
+}
+
+function fitObjectToView(THREE, object, camera, controls) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  object.position.sub(center);
+
+  const maxDimension = Math.max(size.x, size.y, size.z) || 1;
+  const distance = maxDimension * 1.85;
+  camera.position.set(distance, distance * 0.72, distance);
+  camera.near = distance / 100;
+  camera.far = distance * 100;
+  camera.updateProjectionMatrix();
+
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+
+function preparePreviewObject(THREE, object) {
+  object.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new THREE.MeshStandardMaterial({
+        color: 0x77b7ff,
+        roughness: 0.46,
+        metalness: 0.08,
+      });
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+  return object;
+}
+
+async function loadPreviewObject(file, extension, THREE) {
+  if (extension === "stl") {
+    const { STLLoader } = await import("three/addons/loaders/STLLoader.js");
+    const geometry = new STLLoader().parse(await file.arrayBuffer());
+    geometry.computeVertexNormals();
+    return new THREE.Mesh(
+      geometry,
+      new THREE.MeshStandardMaterial({ color: 0x77b7ff, roughness: 0.46, metalness: 0.08 })
+    );
+  }
+
+  const url = URL.createObjectURL(file);
+  try {
+    if (extension === "obj") {
+      const { OBJLoader } = await import("three/addons/loaders/OBJLoader.js");
+      return new OBJLoader().loadAsync(url);
+    }
+    if (extension === "3mf") {
+      const { ThreeMFLoader } = await import("three/addons/loaders/3MFLoader.js");
+      return new ThreeMFLoader().loadAsync(url);
+    }
+    if (extension === "amf") {
+      const { AMFLoader } = await import("three/addons/loaders/AMFLoader.js");
+      return new AMFLoader().loadAsync(url);
+    }
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  throw new Error("unsupported-preview-format");
+}
+
+async function renderModelPreview(file) {
+  const extension = getExtension(file.name);
+  resetModelViewer();
+
+  if (["step", "stp"].includes(extension)) {
+    setPreviewStatus(
+      "STEP 파일은 주문 접수 후 변환 단계에서 확인합니다.",
+      "변환 필요",
+      "브라우저 미리보기는 STL, OBJ, 3MF, AMF 파일을 지원합니다.",
+      "is-error"
+    );
+    return;
+  }
+
+  if (!["stl", "obj", "3mf", "amf"].includes(extension)) {
+    setPreviewStatus("미리보기를 지원하지 않는 파일입니다.", "확인 필요", "STL, OBJ, 3MF, AMF 파일을 올려주세요.", "is-error");
+    return;
+  }
+
+  setPreviewStatus("모델을 불러오는 중입니다.", "로딩", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
+
+  try {
+    const THREE = await import("three");
+    const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050914);
+
+    const width = modelStage.clientWidth || 720;
+    const height = modelStage.clientHeight || 320;
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(width, height);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    modelStage.append(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+
+    scene.add(new THREE.HemisphereLight(0xd9ecff, 0x111827, 2.6));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    keyLight.position.set(4, 6, 7);
+    scene.add(keyLight);
+    const rimLight = new THREE.DirectionalLight(0x246bfe, 1.8);
+    rimLight.position.set(-5, 2, -4);
+    scene.add(rimLight);
+
+    const object = preparePreviewObject(THREE, await loadPreviewObject(file, extension, THREE));
+    scene.add(object);
+    fitObjectToView(THREE, object, camera, controls);
+    modelPlaceholder.hidden = true;
+
+    const resize = () => {
+      const nextWidth = modelStage.clientWidth || width;
+      const nextHeight = modelStage.clientHeight || height;
+      camera.aspect = nextWidth / nextHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nextWidth, nextHeight);
+    };
+
+    const animate = () => {
+      controls.update();
+      object.rotation.z += 0.002;
+      renderer.render(scene, camera);
+      modelViewer.frame = requestAnimationFrame(animate);
+    };
+
+    modelViewer = { scene, renderer, controls, resize, frame: 0 };
+    window.addEventListener("resize", resize);
+    animate();
+    setPreviewStatus(file.name, "미리보기", "마우스로 회전하고 휠로 확대할 수 있습니다.", "is-ready");
+  } catch (error) {
+    resetModelViewer();
+    setPreviewStatus(
+      "모델 미리보기를 불러오지 못했습니다.",
+      "오류",
+      "파일이 손상됐거나 브라우저에서 바로 읽기 어려운 형식입니다. 주문 접수 후 변환 단계에서 확인합니다.",
+      "is-error"
+    );
+  }
+}
+
 async function inspectModelFile(file) {
   const extension = getExtension(file.name);
   const baseInfo = `${extension.toUpperCase()} · ${formatBytes(file.size)}`;
@@ -175,10 +355,16 @@ async function inspectModelFile(file) {
 function clearUploadedFile() {
   modelFile.value = "";
   uploadedFileInfo = null;
+  resetModelViewer();
   fileStatus.hidden = true;
   fileName.textContent = "파일 미선택";
   fileMeta.textContent = "파일을 올리면 확인 정보가 표시됩니다.";
   resultFileCheck.textContent = "3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.";
+  setPreviewStatus(
+    "파일을 올리면 모델이 표시됩니다.",
+    "대기",
+    "STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다."
+  );
   calculate();
 }
 
@@ -270,7 +456,10 @@ form.addEventListener("input", calculate);
 form.addEventListener("change", calculate);
 modelFile.addEventListener("change", () => {
   const [file] = modelFile.files;
-  if (file) inspectModelFile(file).catch(() => clearUploadedFile());
+  if (file) {
+    inspectModelFile(file).catch(() => clearUploadedFile());
+    renderModelPreview(file);
+  }
 });
 clearFile.addEventListener("click", clearUploadedFile);
 
@@ -292,6 +481,7 @@ fileDrop.addEventListener("drop", (event) => {
   const [file] = event.dataTransfer.files;
   if (file) {
     inspectModelFile(file).catch(() => clearUploadedFile());
+    renderModelPreview(file);
   }
 });
 

@@ -431,6 +431,103 @@ article {
   font-weight: 800;
 }
 
+.model-preview {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  background: #050914;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+}
+
+.model-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.model-preview-head strong {
+  display: block;
+  color: var(--white);
+  font-size: 18px;
+}
+
+#modelPreviewBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: #dbeafe;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#modelPreviewBadge.is-ready {
+  background: rgba(36, 107, 254, 0.18);
+  border-color: rgba(14, 165, 255, 0.45);
+  color: var(--white);
+}
+
+#modelPreviewBadge.is-error {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.model-stage {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(36, 107, 254, 0.18), transparent 36%),
+    linear-gradient(135deg, #080d18, #03060d);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.model-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+.model-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.model-placeholder span {
+  color: #8ec6ff;
+  font-size: 40px;
+}
+
+.model-placeholder strong {
+  color: var(--white);
+  font-size: 20px;
+}
+
+.model-placeholder p,
+.model-preview-note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.model-preview-note {
+  font-size: 14px;
+}
+
 input,
 select {
   width: 100%;
@@ -823,6 +920,11 @@ footer strong {
 
   .file-status {
     align-items: stretch;
+    flex-direction: column;
+  }
+
+  .model-preview-head {
+    align-items: flex-start;
     flex-direction: column;
   }
 
