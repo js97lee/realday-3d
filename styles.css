@@ -578,6 +578,154 @@ select:focus {
   padding-bottom: 120px;
 }
 
+.order-page {
+  background: #080c15;
+}
+
+.order-hero {
+  padding-top: 150px;
+  padding-bottom: 48px;
+  background:
+    linear-gradient(90deg, rgba(5, 7, 13, 0.96), rgba(5, 7, 13, 0.72)),
+    url("assets/hero-3d-print.png") center / cover;
+  border-bottom: 1px solid var(--line);
+}
+
+.order-hero .section-heading,
+.order-layout {
+  width: min(1180px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.order-section {
+  padding-top: 48px;
+}
+
+.order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.order-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 4px;
+}
+
+.order-step > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  background: var(--blue);
+  border-radius: 8px;
+  color: var(--white);
+  font-weight: 800;
+}
+
+.order-step h2 {
+  margin-bottom: 6px;
+  font-size: 24px;
+}
+
+.always-visible {
+  display: flex;
+}
+
+.simulation-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  min-height: 110px;
+  padding: 18px;
+  background: #050914;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.simulation-panel strong,
+.simulation-panel span {
+  display: block;
+}
+
+.simulation-panel strong {
+  margin-bottom: 6px;
+}
+
+.simulation-panel span {
+  color: var(--muted);
+}
+
+.simulation-panel.is-ready {
+  border-color: rgba(14, 165, 255, 0.45);
+  background: rgba(36, 107, 254, 0.12);
+}
+
+.simulation-bars {
+  display: flex;
+  align-items: end;
+  gap: 5px;
+  height: 48px;
+}
+
+.simulation-bars span {
+  width: 9px;
+  background: #8ec6ff;
+  border-radius: 8px;
+}
+
+.simulation-bars span:nth-child(1) {
+  height: 35%;
+}
+
+.simulation-bars span:nth-child(2) {
+  height: 72%;
+}
+
+.simulation-bars span:nth-child(3) {
+  height: 50%;
+}
+
+.simulation-bars span:nth-child(4) {
+  height: 88%;
+}
+
+.pickup-card {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.qr-box {
+  display: grid;
+  width: 212px;
+  min-height: 212px;
+  margin: 16px 0;
+  place-items: center;
+  background: var(--white);
+  border-radius: 8px;
+  color: #172033;
+  text-align: center;
+}
+
+.qr-box img,
+.qr-box canvas {
+  width: 180px;
+  height: 180px;
+}
+
+#pickupCode {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
 footer {
   display: flex;
   justify-content: space-between;
@@ -639,11 +787,13 @@ footer strong {
   .quick-stats,
   .feature-grid,
   .quote-layout,
+  .order-layout,
   .process-list {
     grid-template-columns: 1fr;
   }
 
-  .quote-result {
+  .quote-result,
+  .order-summary {
     position: static;
   }
 }
@@ -674,6 +824,11 @@ footer strong {
   .file-status {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .order-step,
+  .simulation-panel {
+    grid-template-columns: 1fr;
   }
 
   .button {

@@ -214,7 +214,7 @@ function calculate() {
   note.textContent =
     maxSize > 256
       ? "256mm를 넘는 모델은 분할 출력 검토가 필요합니다."
-      : "Bambu Lab FDM 출력 기준의 사전 견적입니다.";
+      : "업로드 파일과 출력 조건을 기준으로 계산한 사전 견적입니다.";
 
   breakdown.innerHTML = [
     ["소재", material.label],
@@ -230,7 +230,7 @@ function calculate() {
   const subject = encodeURIComponent("3D 프린팅 견적 문의");
   const body = encodeURIComponent(
     [
-      "리얼데이 3D 견적 조건",
+      "BlueForge 주문 조건",
       `소재: ${material.label}`,
       `예상 필라멘트: ${weight}g`,
       `수량: ${quantity}개`,
@@ -239,7 +239,7 @@ function calculate() {
       `적층 높이: ${layer.label}`,
       `후가공: ${finish.label}`,
       `서포트: ${support ? "필요" : "불필요"}`,
-      `AMS 다색 출력: ${multiColor ? "예" : "아니오"}`,
+      `다색 출력: ${multiColor ? "예" : "아니오"}`,
       `빠른 납기: ${rush ? "예" : "아니오"}`,
       `업로드 파일: ${uploadedFileInfo ? uploadedFileInfo.name : "없음"}`,
       `예상 금액: ${formatter.format(total)}`,
@@ -247,7 +247,23 @@ function calculate() {
       "모델 파일을 첨부해 최종 견적을 확인해주세요.",
     ].join("\n")
   );
-  quoteMail.href = `sms:01020215243?body=${body}`;
+
+  const orderParams = new URLSearchParams({
+    material: material.label,
+    weight,
+    quantity,
+    hours,
+    maxSize,
+    layer: layer.label,
+    finish: finish.label,
+    support: support ? "필요" : "불필요",
+    multicolor: multiColor ? "예" : "아니오",
+    rush: rush ? "예" : "아니오",
+    file: uploadedFileInfo ? uploadedFileInfo.name : "미업로드",
+    estimate: formatter.format(total),
+    note: decodeURIComponent(body),
+  });
+  quoteMail.href = `order.html?${orderParams.toString()}`;
 }
 
 form.addEventListener("input", calculate);

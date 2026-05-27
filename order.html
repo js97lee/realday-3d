@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BlueForge 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 결제, 24시간 방문 수령 QR을 확인합니다."
+    />
+    <title>BlueForge | 주문하기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="주요 메뉴">
+      <a class="brand" href="index.html" aria-label="BlueForge 홈">
+        <span class="brand-mark">BF</span>
+        <span>BlueForge</span>
+      </a>
+      <nav>
+        <a href="index.html#quote">견적</a>
+        <a href="#simulation">시뮬레이션</a>
+        <a href="#pickup">수령 QR</a>
+      </nav>
+    </header>
+
+    <main class="order-page">
+      <section class="section order-hero">
+        <div class="section-heading">
+          <p class="eyebrow">Order Checkout</p>
+          <h1>주문 전 마지막 확인.</h1>
+          <p>
+            3D 파일과 출력 시뮬레이션을 확인한 뒤 결제 정보를 입력하면 주문 번호와
+            24시간 방문 수령용 QR 코드가 생성됩니다.
+          </p>
+        </div>
+      </section>
+
+      <section class="section order-section">
+        <div class="order-layout">
+          <form class="quote-form order-form" id="orderForm">
+            <div class="order-step">
+              <span>1</span>
+              <div>
+                <h2>3D 파일</h2>
+                <p>메인 견적기에서 넘어온 파일명과 조건을 확인하고, 실제 주문 파일을 다시 선택합니다.</p>
+              </div>
+            </div>
+
+            <div class="file-status always-visible">
+              <div>
+                <strong id="orderFileName">파일 미업로드</strong>
+                <span id="orderEstimateMeta">견적 페이지에서 조건을 넘기면 여기에 표시됩니다.</span>
+              </div>
+            </div>
+
+            <label class="file-drop" for="orderModelFile">
+              <input id="orderModelFile" type="file" accept=".stl,.3mf,.step,.stp,.obj,.amf" />
+              <span class="file-icon" aria-hidden="true">▤</span>
+              <span class="file-title">주문 파일 첨부</span>
+              <span class="file-copy">실제 출력할 최종 파일을 선택합니다.</span>
+              <span class="file-button">파일 선택</span>
+            </label>
+
+            <div class="order-step" id="simulation">
+              <span>2</span>
+              <div>
+                <h2>출력 시뮬레이션</h2>
+                <p>시뮬레이션 파일이나 캡처를 올려 출력 방향, 서포트, 예상 결과를 함께 확인합니다.</p>
+              </div>
+            </div>
+
+            <label class="file-drop" for="simulationFile">
+              <input id="simulationFile" type="file" accept=".3mf,.gcode,.png,.jpg,.jpeg,.webp,.pdf" />
+              <span class="file-icon" aria-hidden="true">▧</span>
+              <span class="file-title">시뮬레이션 파일 올리기</span>
+              <span class="file-copy">3MF, G-code, 이미지 캡처, PDF를 첨부할 수 있습니다.</span>
+              <span class="file-button">파일 선택</span>
+            </label>
+
+            <div class="simulation-panel" id="simulationPanel">
+              <div>
+                <strong>시뮬레이션 대기</strong>
+                <span>파일을 올리면 결과 확인 상태가 표시됩니다.</span>
+              </div>
+              <div class="simulation-bars" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="order-step">
+              <span>3</span>
+              <div>
+                <h2>결제 정보</h2>
+                <p>현재 화면은 주문 접수용 결제 단계입니다. 실제 결제 모듈 연결 전까지는 결제 확인 대기 상태로 생성됩니다.</p>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label>
+                이름
+                <input id="customerName" type="text" placeholder="주문자명" required />
+              </label>
+              <label>
+                연락처
+                <input id="customerPhone" type="tel" placeholder="연락 가능한 번호" required />
+              </label>
+            </div>
+
+            <label>
+              결제 방식
+              <select id="paymentMethod">
+                <option>카드 결제 요청</option>
+                <option>계좌이체 확인</option>
+                <option>현장 결제</option>
+              </select>
+            </label>
+
+            <label class="check">
+              <input id="pickup24" type="checkbox" checked />
+              <span>24시간 방문 수령으로 진행</span>
+            </label>
+
+            <button class="button primary wide" type="submit">
+              <span aria-hidden="true">✓</span>
+              주문서 생성
+            </button>
+          </form>
+
+          <aside class="quote-result order-summary" id="pickup">
+            <span class="result-label">주문 요약</span>
+            <strong id="orderEstimate">견적 미확인</strong>
+            <p id="orderSummaryText">견적 페이지에서 조건을 넘겨 주문을 시작할 수 있습니다.</p>
+            <div class="result-breakdown" id="orderBreakdown"></div>
+
+            <div class="pickup-card">
+              <span class="result-label">24시간 방문 수령 QR</span>
+              <div id="qrCode" class="qr-box">
+                <span>주문서 생성 후 QR 표시</span>
+              </div>
+              <strong id="pickupCode">수령 코드 대기</strong>
+              <p>출력 완료 안내를 받은 뒤 방문 수령 시 이 QR 또는 수령 코드를 제시합니다.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <strong>리얼데이</strong>
+        <span>BlueForge 운영</span>
+      </div>
+      <div class="footer-info">
+        <span>대표자: 이지수</span>
+        <span>사업자등록번호: 146-11-03027</span>
+        <span>통신판매업: -</span>
+        <span>전화: 010-2021-5243</span>
+      </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="order.js"></script>
+  </body>
+</html>
