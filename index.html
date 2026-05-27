@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="리얼데이 3D는 Bambu Lab 장비 기준으로 3D 프린팅 견적을 빠르게 확인하고 주문 상담할 수 있는 서비스입니다."
+    />
+    <title>리얼데이 3D | Bambu Lab 3D 프린팅 견적</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="주요 메뉴">
+      <a class="brand" href="#top" aria-label="리얼데이 3D 홈">
+        <span class="brand-mark">RD</span>
+        <span>리얼데이 3D</span>
+      </a>
+      <nav>
+        <a href="#quote">견적</a>
+        <a href="#machines">장비</a>
+        <a href="#process">진행 방식</a>
+        <a href="#contact">문의</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <img src="assets/hero-3d-print.png" alt="" class="hero-image" />
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Bambu Lab FDM 3D Printing Quote</p>
+          <h1>모델 파일만 있으면 출력 견적까지 바로.</h1>
+          <p class="hero-copy">
+            리얼데이 3D는 밤부랩 장비 기준으로 재료, 적층 높이, 서포트, 납기를 반영해
+            합리적인 3D 프린팅 견적을 계산합니다.
+          </p>
+          <div class="hero-actions">
+            <a href="#quote" class="button primary">
+              <span aria-hidden="true">↧</span>
+              견적 계산하기
+            </a>
+            <a href="#contact" class="button secondary">
+              <span aria-hidden="true">☎</span>
+              010-2021-5243
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-stats" aria-label="서비스 특징">
+        <div>
+          <strong>PLA · PETG · ABS · TPU</strong>
+          <span>일반 파츠부터 기능성 시제품까지</span>
+        </div>
+        <div>
+          <strong>최대 256mm급</strong>
+          <span>Bambu Lab X1/P1 기준 제작 범위</span>
+        </div>
+        <div>
+          <strong>24-72시간 상담</strong>
+          <span>수량과 난이도에 따라 빠른 납기 제안</span>
+        </div>
+      </section>
+
+      <section class="section intro">
+        <div class="section-heading">
+          <p class="eyebrow">Why Realday 3D</p>
+          <h2>주문 전 애매한 비용을 먼저 좁혀드립니다.</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="feature-icon">⌁</span>
+            <h3>FDM 특성 반영</h3>
+            <p>적층 높이, 인필, 서포트 사용량을 반영해 단순 무게 계산보다 현실적인 범위를 제시합니다.</p>
+          </article>
+          <article>
+            <span class="feature-icon">▣</span>
+            <h3>Bambu Lab 기준</h3>
+            <p>X1/P1/A1 계열 출력 크기와 AMS 다색 출력 가능성을 고려해 상담 포인트를 정리합니다.</p>
+          </article>
+          <article>
+            <span class="feature-icon">✓</span>
+            <h3>파일 검토 후 확정</h3>
+            <p>STL, 3MF, STEP 파일을 검토한 뒤 출력 방향, 강도, 표면 품질을 확인해 최종가를 안내합니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section quote-section" id="quote">
+        <div class="section-heading quote-heading">
+          <p class="eyebrow">Instant Estimate</p>
+          <h2>예상 견적 계산기</h2>
+          <p>
+            아래 결과는 빠른 사전 견적입니다. 실제 출력 가능 여부와 최종 금액은 모델 파일 검토 후 확정됩니다.
+          </p>
+        </div>
+
+        <div class="quote-layout">
+          <form class="quote-form" id="quoteForm">
+            <label class="file-drop" for="modelFile" id="fileDrop">
+              <input id="modelFile" type="file" accept=".stl,.3mf,.step,.stp,.obj,.amf" />
+              <span class="file-icon" aria-hidden="true">▤</span>
+              <span class="file-title">3D 파일 올리기</span>
+              <span class="file-copy">STL, 3MF, STEP, OBJ 파일을 선택하면 견적 조건에 함께 반영됩니다.</span>
+              <span class="file-button">파일 선택</span>
+            </label>
+
+            <div class="file-status" id="fileStatus" hidden>
+              <div>
+                <strong id="fileName">파일 미선택</strong>
+                <span id="fileMeta">파일을 올리면 확인 정보가 표시됩니다.</span>
+              </div>
+              <button type="button" id="clearFile">지우기</button>
+            </div>
+
+            <label>
+              소재
+              <select id="material">
+                <option value="pla">PLA - 기본 시제품</option>
+                <option value="petg">PETG - 내구/생활 파츠</option>
+                <option value="abs">ABS/ASA - 내열성</option>
+                <option value="tpu">TPU - 유연 소재</option>
+              </select>
+            </label>
+
+            <div class="field-row">
+              <label>
+                예상 필라멘트
+                <span class="unit-field">
+                  <input id="weight" type="number" min="1" max="3000" value="80" />
+                  <span>g</span>
+                </span>
+              </label>
+              <label>
+                수량
+                <span class="unit-field">
+                  <input id="quantity" type="number" min="1" max="100" value="1" />
+                  <span>개</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <label>
+                출력 시간
+                <span class="unit-field">
+                  <input id="hours" type="number" min="1" max="200" value="6" />
+                  <span>시간</span>
+                </span>
+              </label>
+              <label>
+                최대 치수
+                <span class="unit-field">
+                  <input id="maxSize" type="number" min="10" max="300" value="120" />
+                  <span>mm</span>
+                </span>
+              </label>
+            </div>
+
+            <label>
+              적층 높이
+              <select id="layer">
+                <option value="standard">0.20mm 표준</option>
+                <option value="fine">0.12mm 정밀</option>
+                <option value="draft">0.28mm 빠른 출력</option>
+              </select>
+            </label>
+
+            <label>
+              후가공
+              <select id="finish">
+                <option value="none">서포트 제거만</option>
+                <option value="clean">기본 다듬기</option>
+                <option value="premium">표면 정리 집중</option>
+              </select>
+            </label>
+
+            <div class="toggle-grid">
+              <label class="check">
+                <input id="support" type="checkbox" checked />
+                <span>서포트 필요</span>
+              </label>
+              <label class="check">
+                <input id="multiColor" type="checkbox" />
+                <span>AMS 다색 출력</span>
+              </label>
+              <label class="check">
+                <input id="rush" type="checkbox" />
+                <span>빠른 납기</span>
+              </label>
+            </div>
+          </form>
+
+          <aside class="quote-result" aria-live="polite">
+            <span class="result-label">예상 금액</span>
+            <strong id="estimate">₩0</strong>
+            <p id="estimateNote">입력값을 기준으로 계산 중입니다.</p>
+            <div class="file-check" id="resultFileCheck">3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.</div>
+            <div class="result-breakdown" id="breakdown"></div>
+            <a class="button primary wide" id="quoteMail" href="#contact">
+              <span aria-hidden="true">☎</span>
+              이 조건으로 문자 문의
+            </a>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section machines" id="machines">
+        <div class="section-heading">
+          <p class="eyebrow">Bambu Lab Ready</p>
+          <h2>밤부랩 장비 기준으로 상담합니다.</h2>
+        </div>
+        <div class="machine-table" role="table" aria-label="Bambu Lab 출력 기준">
+          <div role="row">
+            <span role="cell">X1 / P1 계열</span>
+            <strong role="cell">최대 256 x 256 x 256mm급</strong>
+          </div>
+          <div role="row">
+            <span role="cell">A1 mini 계열</span>
+            <strong role="cell">최대 180 x 180 x 180mm급</strong>
+          </div>
+          <div role="row">
+            <span role="cell">AMS 다색 출력</span>
+            <strong role="cell">색상 수, 퍼지량, 소재 조합 확인 필요</strong>
+          </div>
+          <div role="row">
+            <span role="cell">권장 파일</span>
+            <strong role="cell">STL, 3MF, STEP, OBJ</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="section process" id="process">
+        <div class="section-heading">
+          <p class="eyebrow">Process</p>
+          <h2>견적부터 발송까지 네 단계.</h2>
+        </div>
+        <ol class="process-list">
+          <li><strong>파일 전달</strong><span>모델 파일과 원하는 소재, 수량을 보내주세요.</span></li>
+          <li><strong>출력 검토</strong><span>치수, 방향, 서포트, 강도 조건을 확인합니다.</span></li>
+          <li><strong>견적 확정</strong><span>예상 비용과 제작 일정을 확정합니다.</span></li>
+          <li><strong>출력 및 발송</strong><span>검수 후 픽업 또는 택배 발송으로 전달합니다.</span></li>
+        </ol>
+      </section>
+
+      <section class="section contact" id="contact">
+        <div class="section-heading">
+          <p class="eyebrow">Contact</p>
+          <h2>출력 파일을 보내고 확정 견적을 받아보세요.</h2>
+          <p>견적 조건과 모델 파일을 준비한 뒤 전화로 상담하면 더 빠르게 확인할 수 있습니다.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="button primary" href="tel:01020215243">
+            <span aria-hidden="true">☎</span>
+            010-2021-5243
+          </a>
+          <a class="button secondary" href="#quote">
+            <span aria-hidden="true">↥</span>
+            견적 다시 확인
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <strong>리얼데이</strong>
+        <span>3D Printing Quote Studio</span>
+      </div>
+      <div class="footer-info">
+        <span>대표자: 이지수</span>
+        <span>사업자등록번호: 146-11-03027</span>
+        <span>통신판매업: -</span>
+        <span>전화: 010-2021-5243</span>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
