@@ -350,12 +350,19 @@ async function renderModelPreview(file) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf7f7f7);
 
-    const width = modelStage.clientWidth || 720;
-    const height = modelStage.clientHeight || 420;
+    const bounds = modelStage.getBoundingClientRect();
+    const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
+    const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
+    renderer.domElement.dataset.engine = "three.js r159";
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.opacity = "1";
+    renderer.domElement.style.transition = "opacity 0.2s";
+    renderer.domElement.style.touchAction = "none";
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     modelStage.append(renderer.domElement);
 
@@ -381,8 +388,9 @@ async function renderModelPreview(file) {
     modelPlaceholder.hidden = true;
 
     const resize = () => {
-      const nextWidth = modelStage.clientWidth || width;
-      const nextHeight = modelStage.clientHeight || height;
+      const nextBounds = modelStage.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.round(nextBounds.width || modelStage.clientWidth || width));
+      const nextHeight = Math.max(1, Math.round(nextBounds.height || modelStage.clientHeight || height));
       camera.aspect = nextWidth / nextHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(nextWidth, nextHeight);
