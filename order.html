@@ -103,7 +103,7 @@
               <span>3</span>
               <div>
                 <h2>선결제 정보</h2>
-                <p>결제 완료 후 출력 대기열에 주문이 들어갑니다. 실제 결제 모듈 연결 전까지는 선결제 요청 상태로 생성됩니다.</p>
+                <p>결제창에서 먼저 결제를 완료하면 출력 대기열에 주문이 들어갑니다.</p>
               </div>
             </div>
 
@@ -138,8 +138,11 @@
 
             <button class="button primary wide" type="submit">
               <span aria-hidden="true">✓</span>
-              선결제 후 주문 생성
+              결제하기
             </button>
+            <p class="payment-notice" id="paymentNotice">
+              토스페이먼츠 결제창으로 이동합니다. 결제 승인 확인은 서버에서 처리됩니다.
+            </p>
           </form>
 
           <aside class="quote-result order-summary" id="pickup">
@@ -151,7 +154,7 @@
             <div class="pickup-card">
               <span class="result-label">24시간 방문 수령 QR</span>
               <div id="qrCode" class="qr-box">
-                <span>주문서 생성 후 QR 표시</span>
+                <span>결제 완료 후 QR 표시</span>
               </div>
               <strong id="pickupCode">수령 코드 대기</strong>
               <p>선결제와 출력 접수가 완료되면 방문 수령 시 이 QR 또는 수령 코드를 제시합니다.</p>
@@ -175,6 +178,8 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script src="payment-config.js"></script>
     <script src="order.js"></script>
   </body>
 </html>

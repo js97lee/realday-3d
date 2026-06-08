@@ -884,6 +884,21 @@ select:focus {
   font-size: 20px;
 }
 
+.payment-notice {
+  margin: -2px 0 0;
+  padding: 12px 14px;
+  color: #b9c7df;
+  background: rgba(36, 107, 254, 0.12);
+  border: 1px solid rgba(14, 165, 255, 0.28);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.payment-result-card {
+  min-height: 360px;
+}
+
 footer {
   display: flex;
   justify-content: space-between;
