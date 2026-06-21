@@ -341,14 +341,15 @@ function fitObjectToView(THREE, object, camera, controls) {
   object.position.sub(center);
   object.position.z += size.z / 2;
 
-  const maxDimension = Math.max(size.x, size.y, size.z) || 1;
-  const distance = Math.max(180, maxDimension * 2.6);
-  camera.position.set(distance * 0.8, -distance * 1.05, distance * 0.75);
-  camera.near = distance / 100;
-  camera.far = distance * 100;
+  const distance = 360;
+  camera.position.set(distance * 0.72, -distance * 0.9, distance * 0.62);
+  camera.near = 1;
+  camera.far = 2000;
   camera.updateProjectionMatrix();
 
-  controls.target.set(0, 0, Math.max(4, size.z / 3));
+  controls.target.set(0, 0, Math.max(8, Math.min(36, size.z * 0.45)));
+  controls.minDistance = 90;
+  controls.maxDistance = 620;
   controls.update();
 }
 
@@ -463,41 +464,41 @@ function makeSamplePreviewObject(THREE) {
   const group = new THREE.Group();
   const body = makeProductMaterial(THREE, 0xf8fafc, 0.68);
   const accent = makeProductMaterial(THREE, 0xe5e7eb, 0.72);
-  const shadowAccent = makeProductMaterial(THREE, 0xcbd5e1, 0.78);
+  const detail = makeProductMaterial(THREE, 0xdbeafe, 0.74);
+  const darkCut = makeProductMaterial(THREE, 0x475569, 0.8);
 
-  const base = new THREE.Mesh(makeRoundedBox(THREE, 118, 82, 10, 10), body);
-  base.position.z = 0;
-  group.add(base);
+  const tag = new THREE.Mesh(makeRoundedBox(THREE, 108, 62, 5, 12), body);
+  group.add(tag);
 
-  const back = new THREE.Mesh(makeRoundedBox(THREE, 86, 9, 92, 7), body);
-  back.position.set(0, 19, 12);
-  back.rotation.x = THREE.MathUtils.degToRad(-14);
-  group.add(back);
+  const holeRing = new THREE.Mesh(new THREE.TorusGeometry(8.5, 2.2, 16, 48), detail);
+  holeRing.position.set(-42, 0, 7.2);
+  group.add(holeRing);
 
-  const lip = new THREE.Mesh(makeRoundedBox(THREE, 96, 14, 14, 6), accent);
-  lip.position.set(0, -34, 9);
-  group.add(lip);
+  const holeShadow = new THREE.Mesh(new THREE.CylinderGeometry(5.6, 5.6, 1.4, 32), darkCut);
+  holeShadow.position.set(-42, 0, 7.4);
+  group.add(holeShadow);
 
-  const leftFoot = new THREE.Mesh(makeRoundedBox(THREE, 22, 18, 10, 5), body);
-  leftFoot.position.set(-36, -43, 8);
-  group.add(leftFoot);
+  const raisedBar = new THREE.Mesh(makeRoundedBox(THREE, 48, 8, 3.2, 4), accent);
+  raisedBar.position.set(14, 12, 6);
+  group.add(raisedBar);
 
-  const rightFoot = leftFoot.clone();
-  rightFoot.position.x = 36;
-  group.add(rightFoot);
+  const raisedBar2 = raisedBar.clone();
+  raisedBar2.position.y = -2;
+  raisedBar2.scale.x = 0.72;
+  group.add(raisedBar2);
 
-  const cableSlot = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 2, 28), shadowAccent);
-  cableSlot.rotation.x = Math.PI / 2;
-  cableSlot.position.set(0, -42.5, 17);
-  group.add(cableSlot);
+  const raisedBar3 = raisedBar.clone();
+  raisedBar3.position.y = -16;
+  raisedBar3.scale.x = 0.52;
+  group.add(raisedBar3);
 
-  const braceMaterial = makeProductMaterial(THREE, 0xdbeafe, 0.7);
-  [-32, 32].forEach((x) => {
-    const brace = new THREE.Mesh(makeRoundedBox(THREE, 9, 52, 12, 4), braceMaterial);
-    brace.position.set(x, -4, 13);
-    brace.rotation.x = THREE.MathUtils.degToRad(-22);
-    group.add(brace);
-  });
+  const cornerDot = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 3, 32), detail);
+  cornerDot.position.set(44, 20, 6.2);
+  group.add(cornerDot);
+
+  const cornerDot2 = cornerDot.clone();
+  cornerDot2.position.y = -20;
+  group.add(cornerDot2);
 
   return group;
 }
@@ -699,9 +700,9 @@ async function renderSamplePreview() {
   fileStatus.hidden = true;
   resultFileCheck.textContent = "샘플 모델은 조작 예시입니다. 견적은 파일을 올리면 계산됩니다.";
   detailSize.textContent = "-";
-  setViewportStats("샘플 폰 스탠드", ["크기: 118 x 96 x 104 mm", "조작: 드래그 회전 · 휠 확대/축소"]);
+  setViewportStats("샘플 키링 태그", ["크기: 108 x 62 x 9 mm", "조작: 드래그 회전 · 휠 확대/축소"]);
   calculate();
-  setPreviewStatus("샘플 폰 스탠드", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
+  setPreviewStatus("샘플 키링 태그", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
 
   try {
     const THREE = await import("three");
