@@ -311,9 +311,10 @@ function makeBuildPlate(THREE) {
   const size = 256;
   const base = new THREE.Mesh(
     new THREE.PlaneGeometry(size, size),
-    new THREE.MeshBasicMaterial({ color: 0x3f424a, transparent: true, opacity: 0.92 })
+    new THREE.MeshStandardMaterial({ color: 0x3f424a, roughness: 0.86, metalness: 0.02 })
   );
   base.position.z = -0.02;
+  base.receiveShadow = true;
   plate.add(base);
 
   const grid = new THREE.GridHelper(size, 32, 0x777d88, 0x555b66);
@@ -354,11 +355,13 @@ function fitObjectToView(THREE, object, camera, controls) {
 function preparePreviewObject(THREE, object) {
   object.traverse((child) => {
     if (child.isMesh) {
-      child.material = new THREE.MeshStandardMaterial({
-        color: 0xf8fafc,
-        roughness: 0.58,
-        metalness: 0.02,
-      });
+      if (!child.material?.userData?.preserve) {
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xf8fafc,
+          roughness: 0.62,
+          metalness: 0.02,
+        });
+      }
       child.castShadow = true;
       child.receiveShadow = true;
     }
@@ -421,37 +424,112 @@ function makeFallbackPreviewObject(THREE) {
   return group;
 }
 
+function makeProductMaterial(THREE, color, roughness = 0.64) {
+  const material = new THREE.MeshStandardMaterial({
+    color,
+    roughness,
+    metalness: 0.02,
+  });
+  material.userData.preserve = true;
+  return material;
+}
+
+function makeRoundedBox(THREE, width, depth, height, radius) {
+  const x = -width / 2;
+  const y = -depth / 2;
+  const shape = new THREE.Shape();
+  shape.moveTo(x + radius, y);
+  shape.lineTo(x + width - radius, y);
+  shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+  shape.lineTo(x + width, y + depth - radius);
+  shape.quadraticCurveTo(x + width, y + depth, x + width - radius, y + depth);
+  shape.lineTo(x + radius, y + depth);
+  shape.quadraticCurveTo(x, y + depth, x, y + depth - radius);
+  shape.lineTo(x, y + radius);
+  shape.quadraticCurveTo(x, y, x + radius, y);
+
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: height,
+    bevelEnabled: true,
+    bevelSegments: 5,
+    bevelSize: Math.min(radius * 0.38, 3),
+    bevelThickness: Math.min(radius * 0.38, 3),
+  });
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 function makeSamplePreviewObject(THREE) {
   const group = new THREE.Group();
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xf8fafc,
-    roughness: 0.5,
-    metalness: 0.04,
-  });
-  const accent = new THREE.MeshStandardMaterial({
-    color: 0xe5e7eb,
-    roughness: 0.58,
-    metalness: 0.03,
-  });
+  const body = makeProductMaterial(THREE, 0xf8fafc, 0.68);
+  const accent = makeProductMaterial(THREE, 0xe5e7eb, 0.72);
+  const shadowAccent = makeProductMaterial(THREE, 0xcbd5e1, 0.78);
 
-  const base = new THREE.Mesh(new THREE.BoxGeometry(92, 68, 20), material);
-  base.position.z = 10;
+  const base = new THREE.Mesh(makeRoundedBox(THREE, 118, 82, 10, 10), body);
+  base.position.z = 0;
   group.add(base);
 
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(26, 6, 18, 48), accent);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.set(-18, 0, 38);
-  group.add(ring);
+  const back = new THREE.Mesh(makeRoundedBox(THREE, 86, 9, 92, 7), body);
+  back.position.set(0, 19, 12);
+  back.rotation.x = THREE.MathUtils.degToRad(-14);
+  group.add(back);
 
-  const column = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 54, 32), material);
-  column.position.set(30, -8, 47);
-  group.add(column);
+  const lip = new THREE.Mesh(makeRoundedBox(THREE, 96, 14, 14, 6), accent);
+  lip.position.set(0, -34, 9);
+  group.add(lip);
 
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(18, 32, 16), accent);
-  cap.position.set(30, -8, 80);
-  group.add(cap);
+  const leftFoot = new THREE.Mesh(makeRoundedBox(THREE, 22, 18, 10, 5), body);
+  leftFoot.position.set(-36, -43, 8);
+  group.add(leftFoot);
+
+  const rightFoot = leftFoot.clone();
+  rightFoot.position.x = 36;
+  group.add(rightFoot);
+
+  const cableSlot = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 2, 28), shadowAccent);
+  cableSlot.rotation.x = Math.PI / 2;
+  cableSlot.position.set(0, -42.5, 17);
+  group.add(cableSlot);
+
+  const braceMaterial = makeProductMaterial(THREE, 0xdbeafe, 0.7);
+  [-32, 32].forEach((x) => {
+    const brace = new THREE.Mesh(makeRoundedBox(THREE, 9, 52, 12, 4), braceMaterial);
+    brace.position.set(x, -4, 13);
+    brace.rotation.x = THREE.MathUtils.degToRad(-22);
+    group.add(brace);
+  });
 
   return group;
+}
+
+function setupRenderer(THREE, renderer, width, height) {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(width, height);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+}
+
+function addStudioLights(THREE, scene) {
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x4b5563, 1.8));
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+  keyLight.position.set(4, -5, 8);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.camera.left = -180;
+  keyLight.shadow.camera.right = 180;
+  keyLight.shadow.camera.top = 180;
+  keyLight.shadow.camera.bottom = -180;
+  scene.add(keyLight);
+
+  const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.72);
+  fillLight.position.set(-5, 4, 5);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.DirectionalLight(0xffffff, 0.85);
+  rimLight.position.set(-4, -6, 6);
+  scene.add(rimLight);
 }
 
 function applyPreviewMode() {
@@ -531,8 +609,7 @@ async function renderModelPreview(file) {
     const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(width, height);
+    setupRenderer(THREE, renderer, width, height);
     renderer.domElement.dataset.engine = "three.js r159";
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
@@ -540,7 +617,6 @@ async function renderModelPreview(file) {
     renderer.domElement.style.transition = "opacity 0.2s";
     renderer.domElement.style.touchAction = "none";
     renderer.domElement.style.cursor = "grab";
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
     modelStage.append(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -551,13 +627,7 @@ async function renderModelPreview(file) {
     controls.enablePan = true;
     controls.screenSpacePanning = true;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x4b5563, 2.4));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    keyLight.position.set(4, 6, 7);
-    scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x93c5fd, 1.1);
-    rimLight.position.set(-5, 2, -4);
-    scene.add(rimLight);
+    addStudioLights(THREE, scene);
     scene.add(makeBuildPlate(THREE));
 
     let object;
@@ -629,9 +699,9 @@ async function renderSamplePreview() {
   fileStatus.hidden = true;
   resultFileCheck.textContent = "샘플 모델은 조작 예시입니다. 견적은 파일을 올리면 계산됩니다.";
   detailSize.textContent = "-";
-  setViewportStats("샘플 모델", ["크기: 92 x 68 x 98 mm", "조작: 드래그 회전 · 휠 확대/축소"]);
+  setViewportStats("샘플 폰 스탠드", ["크기: 118 x 96 x 104 mm", "조작: 드래그 회전 · 휠 확대/축소"]);
   calculate();
-  setPreviewStatus("샘플 모델", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
+  setPreviewStatus("샘플 폰 스탠드", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
 
   try {
     const THREE = await import("three");
@@ -643,13 +713,11 @@ async function renderSamplePreview() {
     const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(width, height);
+    setupRenderer(THREE, renderer, width, height);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.touchAction = "none";
     renderer.domElement.style.cursor = "grab";
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
     modelStage.append(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -660,10 +728,7 @@ async function renderSamplePreview() {
     controls.enablePan = true;
     controls.screenSpacePanning = true;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x4b5563, 2.4));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
-    keyLight.position.set(4, 6, 7);
-    scene.add(keyLight);
+    addStudioLights(THREE, scene);
     scene.add(makeBuildPlate(THREE));
 
     const object = preparePreviewObject(THREE, makeSamplePreviewObject(THREE));
