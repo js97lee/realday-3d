@@ -22,6 +22,40 @@ If the executable is not found automatically, set:
 export BAMBU_STUDIO_CLI="/Applications/BambuStudio.app/Contents/MacOS/bambu-studio"
 ```
 
+## Website integration
+
+The website calls:
+
+```text
+POST /api/slice-estimate
+```
+
+On Netlify this is handled by `netlify/functions/slice-estimate.js`.
+
+Set these Netlify environment variables when the slicer worker is ready:
+
+```bash
+REAL3DMAKER_SLICER_ENDPOINT="https://your-worker.example.com/slice-estimate"
+REAL3DMAKER_SLICER_TOKEN="optional-shared-secret"
+```
+
+The Netlify function forwards the original multipart upload to the worker. Until
+`REAL3DMAKER_SLICER_ENDPOINT` is configured, the site keeps using the browser
+estimate and shows a "worker pending" status instead of blocking orders.
+
+Recommended worker response shape:
+
+```json
+{
+  "ok": true,
+  "quote": {
+    "filament_g": 82.4,
+    "print_time_hours": 5.8,
+    "total_krw": 32000
+  }
+}
+```
+
 ## Parse an already sliced 3MF
 
 ```bash

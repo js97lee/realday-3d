@@ -587,6 +587,64 @@ article {
   font-weight: 800;
 }
 
+.slicer-status {
+  display: grid;
+  gap: 6px;
+  margin: 14px 14px 0;
+  padding: 14px;
+  background: rgba(36, 107, 254, 0.1);
+  border: 1px solid rgba(36, 107, 254, 0.26);
+  border-radius: 8px;
+  color: #334155;
+}
+
+.slicer-status span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.slicer-status strong {
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.slicer-status p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.slicer-status.is-loading {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.slicer-status.is-loading span,
+.slicer-status.is-pending span {
+  color: #b45309;
+}
+
+.slicer-status.is-ready {
+  border-color: rgba(22, 163, 74, 0.35);
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.slicer-status.is-ready span {
+  color: #15803d;
+}
+
+.slicer-status.is-error {
+  border-color: rgba(107, 114, 128, 0.32);
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.slicer-status.is-error span {
+  color: #4b5563;
+}
+
 .model-preview-note {
   font-size: 14px;
 }

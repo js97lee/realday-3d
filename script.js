@@ -35,6 +35,7 @@ const modelPlaceholder = document.querySelector("#modelPlaceholder");
 const modelPreviewTitle = document.querySelector("#modelPreviewTitle");
 const modelPreviewNote = document.querySelector("#modelPreviewNote");
 const simulationHint = document.querySelector("#simulationHint");
+const slicerStatus = document.querySelector("#slicerStatus");
 const previewModeButtons = document.querySelectorAll("[data-preview-mode]");
 const detailMaterial = document.querySelector("#detailMaterial");
 const detailWeight = document.querySelector("#detailWeight");
@@ -48,6 +49,8 @@ const detailPrice = document.querySelector("#detailPrice");
 let uploadedFileInfo = null;
 let modelViewer = null;
 let previewMode = "source";
+let slicerRequestId = 0;
+let activeSlicerQuote = null;
 
 const formatter = new Intl.NumberFormat("ko-KR", {
   style: "currency",
@@ -152,6 +155,103 @@ function setPreviewStatus(title, hint, note, state = "") {
   simulationHint.textContent = hint;
   simulationHint.className = `simulation-hint ${state}`;
   modelPreviewNote.textContent = note;
+}
+
+function setSlicerStatus(state, title, message) {
+  if (!slicerStatus) return;
+  slicerStatus.className = `slicer-status ${state}`;
+  slicerStatus.querySelector("strong").textContent = title;
+  slicerStatus.querySelector("p").textContent = message;
+}
+
+function normalizeSlicerQuote(data) {
+  const quote = data?.quote || data?.result?.quote || data;
+  const stats = data?.stats || data?.result?.stats || {};
+  const grams =
+    quote?.filament_g ?? quote?.filamentGrams ?? quote?.filament_grams ?? stats?.filament_g ?? null;
+  const seconds =
+    quote?.print_time_seconds ??
+    quote?.printTimeSeconds ??
+    stats?.print_time_seconds ??
+    null;
+  const hours = quote?.print_time_hours ?? quote?.printTimeHours ?? (seconds ? seconds / 3600 : null);
+  const total = quote?.total_krw ?? quote?.totalKrw ?? quote?.price_krw ?? null;
+
+  return {
+    grams: Number.isFinite(Number(grams)) ? Number(grams) : null,
+    hours: Number.isFinite(Number(hours)) ? Number(hours) : null,
+    total: Number.isFinite(Number(total)) ? Number(total) : null,
+  };
+}
+
+function applySlicerQuote(data) {
+  const quote = normalizeSlicerQuote(data);
+  const applied = [];
+  activeSlicerQuote = quote;
+
+  if (quote.grams && quote.grams > 0) {
+    document.querySelector("#weight").value = Math.max(1, Math.round(quote.grams));
+    applied.push(`${quote.grams.toFixed(1)}g`);
+  }
+  if (quote.hours && quote.hours > 0) {
+    document.querySelector("#hours").value = Math.max(1, Math.ceil(quote.hours * 10) / 10);
+    applied.push(`${quote.hours.toFixed(1)}시간`);
+  }
+
+  calculate();
+
+  setSlicerStatus(
+    "is-ready",
+    "Bambu 슬라이싱 견적 반영됨",
+    applied.length
+      ? `실제 슬라이싱 결과 기준으로 ${applied.join(", ")} 정보를 견적에 반영했습니다.`
+      : "슬라이서 워커 응답을 받았습니다. 상세 값은 결과 JSON 형식에 맞춰 추가 반영할 수 있습니다."
+  );
+}
+
+async function requestSlicerEstimate(file) {
+  const requestId = (slicerRequestId += 1);
+  activeSlicerQuote = null;
+  setSlicerStatus("is-loading", "Bambu 슬라이싱 요청 중", "파일과 출력 조건을 서버 슬라이서 워커로 전달하고 있습니다.");
+
+  const formData = new FormData();
+  formData.append("model", file, file.name);
+  formData.append("material", valueOf("material"));
+  formData.append("layer", valueOf("layer"));
+  formData.append("support", valueOf("support") ? "true" : "false");
+  formData.append("quantity", valueOf("quantity"));
+  formData.append("maxSize", valueOf("maxSize"));
+
+  try {
+    const response = await fetch("/api/slice-estimate", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (requestId !== slicerRequestId) return;
+
+    if (response.status === 202 || data?.mode === "browser-estimate") {
+      setSlicerStatus(
+        "is-pending",
+        "브라우저 예측 견적 사용 중",
+        data?.message || "슬라이서 워커가 아직 연결되지 않아 현재 입력값 기반 견적을 사용합니다."
+      );
+      return;
+    }
+
+    if (!response.ok || data?.ok === false) {
+      throw new Error(data?.message || "슬라이싱 견적을 받을 수 없습니다.");
+    }
+
+    applySlicerQuote(data);
+  } catch (error) {
+    if (requestId !== slicerRequestId) return;
+    setSlicerStatus(
+      "is-error",
+      "정밀 슬라이싱 연결 실패",
+      error?.message || "현재는 브라우저 예측 견적으로 계속 진행합니다."
+    );
+  }
 }
 
 function updatePreviewModeButtons() {
@@ -465,6 +565,8 @@ async function inspectModelFile(file) {
 function clearUploadedFile() {
   modelFile.value = "";
   uploadedFileInfo = null;
+  slicerRequestId += 1;
+  activeSlicerQuote = null;
   resetModelViewer();
   fileStatus.hidden = true;
   fileName.textContent = "파일 미선택";
@@ -474,6 +576,11 @@ function clearUploadedFile() {
     "파일을 올리면 모델이 표시됩니다.",
     "STL, OBJ, 3MF, AMF 파일은 웹에서 바로 자동 렌더링됩니다.",
     "STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다."
+  );
+  setSlicerStatus(
+    "is-pending",
+    "Bambu Studio 워커 연결 대기",
+    "파일을 올리면 서버 기반 슬라이싱 견적을 요청하고, 연결 전에는 브라우저 예측 견적을 사용합니다."
   );
   calculate();
 }
@@ -505,17 +612,20 @@ function calculate() {
     layer.value;
   const rushCost = rush ? subtotal * 0.25 : 0;
   const total = Math.max(15000, roundPrice(subtotal + rushCost));
+  const finalTotal = activeSlicerQuote?.total && activeSlicerQuote.total > 0 ? activeSlicerQuote.total : total;
 
-  estimate.textContent = formatter.format(total);
+  estimate.textContent = formatter.format(finalTotal);
   detailMaterial.textContent = material.label;
   detailWeight.textContent = `${weight}g`;
   detailInfill.textContent = support ? "보통" : "낮음";
   detailQuality.textContent = layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal";
   detailTime.textContent = `${hours}시간`;
   detailQuantity.textContent = `${quantity}개`;
-  detailPrice.textContent = formatter.format(total);
+  detailPrice.textContent = formatter.format(finalTotal);
   note.textContent =
-    maxSize > 256
+    activeSlicerQuote?.total && activeSlicerQuote.total > 0
+      ? "Bambu 슬라이싱 워커가 내려준 총액을 반영한 사전 견적입니다."
+      : maxSize > 256
       ? "256mm를 넘는 모델은 분할 출력 검토가 필요합니다."
       : "업로드 파일과 출력 조건을 기준으로 계산한 사전 견적입니다.";
 
@@ -545,7 +655,7 @@ function calculate() {
       `다색 출력: ${multiColor ? "예" : "아니오"}`,
       `빠른 납기: ${rush ? "예" : "아니오"}`,
       `업로드 파일: ${uploadedFileInfo ? uploadedFileInfo.name : "없음"}`,
-      `예상 금액: ${formatter.format(total)}`,
+      `예상 금액: ${formatter.format(finalTotal)}`,
       "",
       "모델 파일을 첨부해 최종 견적을 확인해주세요.",
     ].join("\n")
@@ -563,17 +673,27 @@ function calculate() {
     multicolor: multiColor ? "예" : "아니오",
     rush: rush ? "예" : "아니오",
     file: uploadedFileInfo ? uploadedFileInfo.name : "미업로드",
-    estimate: formatter.format(total),
+    estimate: formatter.format(finalTotal),
     note: decodeURIComponent(body),
   });
   quoteMail.href = `order.html?${orderParams.toString()}`;
 }
 
-form.addEventListener("input", calculate);
-form.addEventListener("change", calculate);
-form.addEventListener("change", () => {
+function handleQuoteFormChange(event) {
+  if (event.target !== modelFile && activeSlicerQuote) {
+    activeSlicerQuote = null;
+    setSlicerStatus(
+      "is-pending",
+      "조건 변경됨",
+      "출력 조건이 바뀌어 정밀 슬라이싱 총액 적용을 해제하고 현재 조건 기반 견적으로 계산합니다."
+    );
+  }
+  calculate();
   applyPreviewMode();
-});
+}
+
+form.addEventListener("input", handleQuoteFormChange);
+form.addEventListener("change", handleQuoteFormChange);
 previewModeButtons.forEach((button) => {
   button.addEventListener("click", () => setPreviewMode(button.dataset.previewMode));
 });
@@ -582,6 +702,7 @@ modelFile.addEventListener("change", () => {
   if (file) {
     inspectModelFile(file).catch(() => clearUploadedFile());
     renderModelPreview(file);
+    requestSlicerEstimate(file);
   }
 });
 clearFile.addEventListener("click", clearUploadedFile);
@@ -603,8 +724,14 @@ clearFile.addEventListener("click", clearUploadedFile);
 fileDrop.addEventListener("drop", (event) => {
   const [file] = event.dataTransfer.files;
   if (file) {
+    try {
+      modelFile.files = event.dataTransfer.files;
+    } catch {
+      modelFile.value = "";
+    }
     inspectModelFile(file).catch(() => clearUploadedFile());
     renderModelPreview(file);
+    requestSlicerEstimate(file);
   }
 });
 
