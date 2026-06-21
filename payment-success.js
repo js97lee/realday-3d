@@ -48,7 +48,7 @@ function fallbackQr(text) {
 
 function renderQr(order) {
   const payload = JSON.stringify({
-    service: "real3Dmaker",
+    service: "Real3DMaker",
     orderId,
     paymentKey,
     pickup: order?.pickup || "24H_VISIT",

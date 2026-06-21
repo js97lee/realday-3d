@@ -1,6 +1,6 @@
-# real3Dmaker Payment Setup
+# Real3DMaker Payment Setup
 
-real3Dmaker uses Toss Payments Standard Payment Window for card and easy-pay checkout.
+Real3DMaker uses Toss Payments Standard Payment Window for card and easy-pay checkout.
 
 ## What Is Already Wired
 

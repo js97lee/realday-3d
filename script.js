@@ -533,7 +533,7 @@ function calculate() {
   const subject = encodeURIComponent("3D 프린팅 견적 문의");
   const body = encodeURIComponent(
     [
-      "real3Dmaker 주문 조건",
+      "Real3DMaker 주문 조건",
       `소재: ${material.label}`,
       `예상 필라멘트: ${weight}g`,
       `수량: ${quantity}개`,

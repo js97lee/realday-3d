@@ -54,7 +54,7 @@ function buildOrderPayload(orderId) {
   return {
     orderId,
     amount,
-    orderName: `real3Dmaker 3D 출력 - ${fileName}`.slice(0, 100),
+    orderName: `Real3DMaker 3D 출력 - ${fileName}`.slice(0, 100),
     customerName: document.querySelector("#customerName").value.trim(),
     customerMobilePhone: cleanPhone(document.querySelector("#customerPhone").value),
     fileName,
@@ -148,7 +148,7 @@ function fallbackQr(text) {
 
 function renderQr(orderId) {
   const payload = JSON.stringify({
-    service: "real3Dmaker",
+    service: "Real3DMaker",
     orderId,
     pickup: "24H_VISIT",
     estimate: param("estimate", ""),
