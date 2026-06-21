@@ -37,6 +37,7 @@ const modelPreviewTitle = document.querySelector("#modelPreviewTitle");
 const modelPreviewNote = document.querySelector("#modelPreviewNote");
 const simulationHint = document.querySelector("#simulationHint");
 const slicerStatus = document.querySelector("#slicerStatus");
+const viewportStats = document.querySelector("#viewportStats");
 const previewModeButtons = document.querySelectorAll("[data-preview-mode]");
 const detailMaterial = document.querySelector("#detailMaterial");
 const detailWeight = document.querySelector("#detailWeight");
@@ -68,6 +69,12 @@ function setText(element, value) {
   if (element) {
     element.textContent = value;
   }
+}
+
+function setViewportStats(title, lines) {
+  if (!viewportStats) return;
+  viewportStats.querySelector("strong").textContent = title;
+  viewportStats.querySelector("span").innerHTML = lines.filter(Boolean).join("<br />");
 }
 
 function roundPrice(price) {
@@ -149,6 +156,10 @@ function applyFileInfo(info) {
   fileMeta.textContent = info.meta;
   resultFileCheck.textContent = info.resultText;
   detailSize.textContent = info.dimensions || "-";
+  setViewportStats(info.name, [
+    info.dimensions ? `크기: ${info.dimensions}` : info.meta,
+    info.triangles ? `삼각형 수: ${info.triangles.toLocaleString("ko-KR")}` : "",
+  ]);
 
   if (info.maxDimension) {
     maxSizeInput.value = Math.ceil(info.maxDimension);
@@ -298,7 +309,14 @@ function resetModelViewer() {
 function makeBuildPlate(THREE) {
   const plate = new THREE.Group();
   const size = 256;
-  const grid = new THREE.GridHelper(size, 32, 0xa9a9a9, 0xb8b8b8);
+  const base = new THREE.Mesh(
+    new THREE.PlaneGeometry(size, size),
+    new THREE.MeshBasicMaterial({ color: 0x3f424a, transparent: true, opacity: 0.92 })
+  );
+  base.position.z = -0.02;
+  plate.add(base);
+
+  const grid = new THREE.GridHelper(size, 32, 0x777d88, 0x555b66);
   grid.rotation.x = Math.PI / 2;
   grid.position.z = 0;
   plate.add(grid);
@@ -337,7 +355,7 @@ function preparePreviewObject(THREE, object) {
   object.traverse((child) => {
     if (child.isMesh) {
       child.material = new THREE.MeshStandardMaterial({
-        color: 0xd7d7d7,
+        color: 0xf8fafc,
         roughness: 0.58,
         metalness: 0.02,
       });
@@ -382,7 +400,7 @@ function makeSupportPreview(THREE, object) {
 function makeFallbackPreviewObject(THREE) {
   const group = new THREE.Group();
   const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0x77b7ff,
+    color: 0xf8fafc,
     roughness: 0.52,
     metalness: 0.04,
   });
@@ -406,12 +424,12 @@ function makeFallbackPreviewObject(THREE) {
 function makeSamplePreviewObject(THREE) {
   const group = new THREE.Group();
   const material = new THREE.MeshStandardMaterial({
-    color: 0x77b7ff,
+    color: 0xf8fafc,
     roughness: 0.5,
     metalness: 0.04,
   });
   const accent = new THREE.MeshStandardMaterial({
-    color: 0x246bfe,
+    color: 0xe5e7eb,
     roughness: 0.58,
     metalness: 0.03,
   });
@@ -440,8 +458,8 @@ function applyPreviewMode() {
   if (!modelViewer) return;
   modelViewer.object.traverse((child) => {
     if (child.isMesh) {
-      child.material.color.set(previewMode === "source" ? 0xd7d7d7 : 0x77b7ff);
-      child.material.wireframe = previewMode === "source";
+      child.material.color.set(previewMode === "source" ? 0xf8fafc : 0xdbeafe);
+      child.material.wireframe = false;
       child.material.opacity = 1;
       child.material.transparent = false;
     }
@@ -506,7 +524,7 @@ async function renderModelPreview(file) {
     const THREE = await import("three");
     const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf7f7f7);
+    scene.background = new THREE.Color(0x575a63);
 
     const bounds = modelStage.getBoundingClientRect();
     const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
@@ -533,7 +551,7 @@ async function renderModelPreview(file) {
     controls.enablePan = true;
     controls.screenSpacePanning = true;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 2.4));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x4b5563, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
     keyLight.position.set(4, 6, 7);
     scene.add(keyLight);
@@ -611,6 +629,7 @@ async function renderSamplePreview() {
   fileStatus.hidden = true;
   resultFileCheck.textContent = "샘플 모델은 조작 예시입니다. 견적은 파일을 올리면 계산됩니다.";
   detailSize.textContent = "-";
+  setViewportStats("샘플 모델", ["크기: 92 x 68 x 98 mm", "조작: 드래그 회전 · 휠 확대/축소"]);
   calculate();
   setPreviewStatus("샘플 모델", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
 
@@ -618,7 +637,7 @@ async function renderSamplePreview() {
     const THREE = await import("three");
     const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf7f7f7);
+    scene.background = new THREE.Color(0x575a63);
     const bounds = modelStage.getBoundingClientRect();
     const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
     const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
@@ -641,7 +660,7 @@ async function renderSamplePreview() {
     controls.enablePan = true;
     controls.screenSpacePanning = true;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 2.4));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x4b5563, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
     keyLight.position.set(4, 6, 7);
     scene.add(keyLight);
@@ -707,6 +726,7 @@ async function inspectModelFile(file) {
         resultText: `STL 파일 확인됨. 대략 치수는 ${dimensions}이며 최대 치수를 견적기에 반영했습니다.`,
         maxDimension,
         dimensions,
+        triangles: bounds.triangles,
       });
       return;
     }
@@ -729,6 +749,7 @@ function clearUploadedFile() {
   fileName.textContent = "파일 미선택";
   fileMeta.textContent = "파일을 올리면 확인 정보가 표시됩니다.";
   resultFileCheck.textContent = "3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.";
+  setViewportStats("모델 정보", ["파일을 올리면 크기와 형식이 표시됩니다."]);
   setPreviewStatus(
     "파일을 올리거나 샘플을 열어보세요.",
     "드래그 회전 · 휠 확대/축소",

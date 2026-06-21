@@ -512,8 +512,8 @@ article {
   height: min(48vh, 520px);
   min-height: 340px;
   overflow: hidden;
-  background: #f7f7f7;
-  border: 2px solid rgba(36, 107, 254, 0.74);
+  background: #575a63;
+  border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 8px;
   touch-action: none;
 }
@@ -542,6 +542,7 @@ article {
   color: #6b7280;
   text-align: center;
   pointer-events: none;
+  z-index: 2;
 }
 
 .model-placeholder[hidden] {
@@ -549,12 +550,12 @@ article {
 }
 
 .model-placeholder span {
-  color: var(--blue);
+  color: #e5e7eb;
   font-size: 40px;
 }
 
 .model-placeholder strong {
-  color: #0f172a;
+  color: #f8fafc;
   font-size: 20px;
 }
 
@@ -563,6 +564,96 @@ article {
   margin: 0;
   color: #6b7280;
   line-height: 1.55;
+}
+
+.viewport-topbar,
+.viewport-axis,
+.viewport-stats {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.viewport-topbar {
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.viewport-topbar span {
+  padding: 7px 10px;
+  background: rgba(31, 41, 55, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 8px;
+}
+
+.viewport-axis {
+  left: 16px;
+  bottom: 18px;
+  width: 72px;
+  height: 72px;
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.viewport-axis::before,
+.viewport-axis::after {
+  position: absolute;
+  content: "";
+  background: currentColor;
+}
+
+.viewport-axis::before {
+  left: 14px;
+  bottom: 12px;
+  width: 2px;
+  height: 46px;
+}
+
+.viewport-axis::after {
+  left: 14px;
+  bottom: 12px;
+  width: 46px;
+  height: 2px;
+}
+
+.viewport-axis span:first-child {
+  position: absolute;
+  left: 8px;
+  top: 0;
+}
+
+.viewport-axis span:last-child {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+}
+
+.viewport-stats {
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  gap: 4px;
+  max-width: min(330px, calc(100% - 112px));
+  padding: 12px 14px;
+  background: rgba(24, 24, 27, 0.82);
+  border-left: 5px solid #22c55e;
+  border-radius: 8px;
+  color: #d1d5db;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.viewport-stats strong {
+  color: #fff;
+  font-size: 14px;
 }
 
 .simulation-details {

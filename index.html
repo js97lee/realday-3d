@@ -155,10 +155,22 @@
                 드래그 회전 · 휠 확대/축소
               </p>
               <div class="model-stage" id="modelStage">
+                <div class="viewport-topbar" aria-hidden="true">
+                  <span>플레이트 미리보기</span>
+                  <span>PLA · 0.20mm</span>
+                </div>
                 <div class="model-placeholder" id="modelPlaceholder">
                   <span>▧</span>
                   <strong>미리보기 대기</strong>
                   <p>샘플을 보거나 3D 파일을 올려주세요.</p>
+                </div>
+                <div class="viewport-axis" aria-hidden="true">
+                  <span>Z</span>
+                  <span>X</span>
+                </div>
+                <div class="viewport-stats" id="viewportStats" aria-live="polite">
+                  <strong>모델 정보</strong>
+                  <span>파일을 올리면 크기와 형식이 표시됩니다.</span>
                 </div>
               </div>
               <div class="simulation-details" aria-label="파일 상세 정보">
