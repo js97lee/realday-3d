@@ -13,7 +13,8 @@ const qrCode = document.querySelector("#qrCode");
 const pickupCode = document.querySelector("#pickupCode");
 const paymentNotice = document.querySelector("#paymentNotice");
 
-const paymentConfig = window.BLUEFORGE_PAYMENT || {};
+const paymentConfig = window.REAL3DMAKER_PAYMENT || window.BLUEFORGE_PAYMENT || {};
+const basePath = window.location.pathname.replace(/[^/]*$/, "");
 
 function param(name, fallback = "-") {
   return params.get(name) || fallback;
@@ -43,7 +44,7 @@ function createOrderId() {
     String(now.getDate()).padStart(2, "0"),
   ].join("");
   const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).toUpperCase().slice(0, 6);
-  return `BF-${date}-${random}`;
+  return `R3D-${date}-${random}`;
 }
 
 function buildOrderPayload(orderId) {
@@ -53,7 +54,7 @@ function buildOrderPayload(orderId) {
   return {
     orderId,
     amount,
-    orderName: `BlueForge 3D 출력 - ${fileName}`.slice(0, 100),
+    orderName: `real3Dmaker 3D 출력 - ${fileName}`.slice(0, 100),
     customerName: document.querySelector("#customerName").value.trim(),
     customerMobilePhone: cleanPhone(document.querySelector("#customerPhone").value),
     fileName,
@@ -61,12 +62,18 @@ function buildOrderPayload(orderId) {
     quantity: param("quantity", "1"),
     pickup: document.querySelector("#pickup24").checked ? "24H_VISIT" : "VISIT",
     estimate: param("estimate", ""),
+    paymentMethod: document.querySelector("#paymentMethod").value,
+    memo: document.querySelector("#paymentMemo").value.trim(),
   };
 }
 
+function getReturnUrl(page) {
+  return `${window.location.origin}${basePath}${page}`;
+}
+
 function savePendingOrder(payload) {
-  sessionStorage.setItem(`blueforge-order-${payload.orderId}`, JSON.stringify(payload));
-  sessionStorage.setItem("blueforge-last-order", JSON.stringify(payload));
+  sessionStorage.setItem(`real3dmaker-order-${payload.orderId}`, JSON.stringify(payload));
+  sessionStorage.setItem("real3dmaker-last-order", JSON.stringify(payload));
 }
 
 function setInitialSummary() {
@@ -141,7 +148,7 @@ function fallbackQr(text) {
 
 function renderQr(orderId) {
   const payload = JSON.stringify({
-    service: "BlueForge",
+    service: "real3Dmaker",
     orderId,
     pickup: "24H_VISIT",
     estimate: param("estimate", ""),
@@ -180,7 +187,7 @@ orderForm.addEventListener("submit", (event) => {
   }
 
   if (!clientKey || clientKey.includes("REPLACE_ME")) {
-    paymentNotice.textContent = "토스페이먼츠 clientKey가 필요합니다. payment-config.js에 테스트 또는 라이브 clientKey를 넣어주세요.";
+    paymentNotice.textContent = "토스페이먼츠 clientKey가 필요합니다. payment-config.js에 테스트 키를 넣으면 결제창 테스트가 가능합니다.";
     return;
   }
 
@@ -194,20 +201,21 @@ orderForm.addEventListener("submit", (event) => {
   const payment = tossPayments.payment({ customerKey: TossPayments.ANONYMOUS || "ANONYMOUS" });
 
   payment.requestPayment({
-    method: document.querySelector("#paymentMethod").value.includes("계좌") ? "TRANSFER" : "CARD",
+    method: payload.paymentMethod,
     amount: {
       value: payload.amount,
       currency: "KRW",
     },
     orderId: payload.orderId,
     orderName: payload.orderName,
-    successUrl: `${window.location.origin}${window.location.pathname.replace(/order\.html$/, "")}payment-success.html`,
-    failUrl: `${window.location.origin}${window.location.pathname.replace(/order\.html$/, "")}payment-fail.html`,
+    successUrl: getReturnUrl("payment-success.html"),
+    failUrl: getReturnUrl("payment-fail.html"),
     customerName: payload.customerName,
     customerMobilePhone: payload.customerMobilePhone,
     metadata: {
       fileName: payload.fileName,
       pickup: payload.pickup,
+      paymentMethod: payload.paymentMethod,
     },
   }).catch((error) => {
     paymentNotice.textContent = error.message || "결제창을 열지 못했습니다. 잠시 후 다시 시도해주세요.";

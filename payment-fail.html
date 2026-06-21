@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="BlueForge 결제 실패 안내 페이지입니다."
+      content="real3Dmaker 결제 실패 안내 페이지입니다."
     />
-    <title>BlueForge | 결제 실패</title>
+    <title>real3Dmaker | 결제 실패</title>
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://js97lee.github.io/realday-3d/payment-fail.html" />
-    <meta property="og:title" content="BlueForge | Bambu Lab FDM 3D Printing Quote" />
+    <meta property="og:title" content="real3Dmaker | Bambu Lab FDM 3D Printing Quote" />
     <meta property="og:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta property="og:image" content="https://js97lee.github.io/realday-3d/assets/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="BlueForge | Bambu Lab FDM 3D Printing Quote" />
+    <meta name="twitter:title" content="real3Dmaker | Bambu Lab FDM 3D Printing Quote" />
     <meta name="twitter:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta name="twitter:image" content="https://js97lee.github.io/realday-3d/assets/og-image.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,13 +29,14 @@
   </head>
   <body>
     <header class="site-header" aria-label="주요 메뉴">
-      <a class="brand" href="index.html" aria-label="BlueForge 홈">
-        <span class="brand-mark">BF</span>
-        <span>BlueForge</span>
+      <a class="brand" href="index.html" aria-label="real3Dmaker 홈">
+        <span class="brand-mark">R3D</span>
+        <span>real3Dmaker</span>
       </a>
       <nav>
         <a href="index.html#quote">견적</a>
         <a href="order.html">주문하기</a>
+        <a href="policies.html">고객 안내</a>
       </nav>
     </header>
 
@@ -45,6 +46,7 @@
           <p class="eyebrow">Payment Failed</p>
           <h1>결제가 완료되지 않았습니다.</h1>
           <p id="failMessage">결제창에서 결제가 취소되었거나 승인에 실패했습니다.</p>
+          <div class="result-breakdown fail-breakdown" id="failBreakdown"></div>
           <div class="hero-actions">
             <a href="order.html" class="button primary">
               <span aria-hidden="true">↻</span>
@@ -62,20 +64,31 @@
     <footer>
       <div>
         <strong>리얼데이</strong>
-        <span>BlueForge 운영</span>
+        <span>real3Dmaker 운영</span>
       </div>
       <div class="footer-info">
+        <span>상호: 리얼데이</span>
         <span>대표자: 이지수</span>
         <span>사업자등록번호: 146-11-03027</span>
         <span>통신판매업: -</span>
         <span>전화: 010-2021-5243</span>
+        <span>고객센터: 010-2021-5243</span>
+        <a href="policies.html">환불/취소 및 사업자 정보</a>
       </div>
     </footer>
 
     <script>
       const failParams = new URLSearchParams(window.location.search);
+      const code = failParams.get("code") || "-";
       const message = failParams.get("message") || "결제창에서 결제가 취소되었거나 승인에 실패했습니다.";
+      const orderId = failParams.get("orderId") || "-";
       document.querySelector("#failMessage").textContent = message;
+      document.querySelector("#failBreakdown").innerHTML = [
+        ["에러 코드", code],
+        ["주문번호", orderId],
+      ]
+        .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
+        .join("");
     </script>
   </body>
 </html>

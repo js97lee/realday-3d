@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="BlueForge 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 결제, 24시간 방문 수령 QR을 확인합니다."
+      content="real3Dmaker 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 결제, 24시간 방문 수령 QR을 확인합니다."
     />
-    <title>BlueForge | 주문하기</title>
+    <title>real3Dmaker | 주문하기</title>
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://js97lee.github.io/realday-3d/order.html" />
-    <meta property="og:title" content="BlueForge | Bambu Lab FDM 3D Printing Quote" />
+    <meta property="og:title" content="real3Dmaker | Bambu Lab FDM 3D Printing Quote" />
     <meta property="og:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta property="og:image" content="https://js97lee.github.io/realday-3d/assets/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="BlueForge | Bambu Lab FDM 3D Printing Quote" />
+    <meta name="twitter:title" content="real3Dmaker | Bambu Lab FDM 3D Printing Quote" />
     <meta name="twitter:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta name="twitter:image" content="https://js97lee.github.io/realday-3d/assets/og-image.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -29,14 +29,15 @@
   </head>
   <body>
     <header class="site-header" aria-label="주요 메뉴">
-      <a class="brand" href="index.html" aria-label="BlueForge 홈">
-        <span class="brand-mark">BF</span>
-        <span>BlueForge</span>
+      <a class="brand" href="index.html" aria-label="real3Dmaker 홈">
+        <span class="brand-mark">R3D</span>
+        <span>real3Dmaker</span>
       </a>
       <nav>
         <a href="index.html#quote">견적</a>
         <a href="#simulation">시뮬레이션</a>
         <a href="#pickup">수령 QR</a>
+        <a href="policies.html">고객 안내</a>
       </nav>
     </header>
 
@@ -121,8 +122,7 @@
             <label>
               결제 방식
               <select id="paymentMethod">
-                <option>카드 선결제</option>
-                <option>계좌이체 선결제</option>
+                <option value="CARD">카드/간편결제 선결제</option>
               </select>
             </label>
 
@@ -136,12 +136,17 @@
               <span>24시간 방문 수령으로 진행</span>
             </label>
 
+            <label class="check">
+              <input id="policyAgree" type="checkbox" required />
+              <span>주문 제작 상품의 결제, 제작, 수령, 취소/환불 안내를 확인했습니다.</span>
+            </label>
+
             <button class="button primary wide" type="submit">
               <span aria-hidden="true">✓</span>
               결제하기
             </button>
             <p class="payment-notice" id="paymentNotice">
-              토스페이먼츠 결제창으로 이동합니다. 결제 승인 확인은 서버에서 처리됩니다.
+              토스페이먼츠 테스트 결제창으로 이동합니다. 실제 결제 전 라이브 키와 서버 환경변수를 설정하세요.
             </p>
           </form>
 
@@ -167,13 +172,16 @@
     <footer>
       <div>
         <strong>리얼데이</strong>
-        <span>BlueForge 운영</span>
+        <span>real3Dmaker 운영</span>
       </div>
       <div class="footer-info">
+        <span>상호: 리얼데이</span>
         <span>대표자: 이지수</span>
         <span>사업자등록번호: 146-11-03027</span>
         <span>통신판매업: -</span>
         <span>전화: 010-2021-5243</span>
+        <span>고객센터: 010-2021-5243</span>
+        <a href="policies.html">환불/취소 및 사업자 정보</a>
       </div>
     </footer>
 

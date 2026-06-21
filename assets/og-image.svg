@@ -23,11 +23,11 @@
   <g filter="url(#softShadow)">
     <rect x="72" y="72" width="86" height="86" rx="18" fill="#246bfe"/>
     <text x="115" y="126" text-anchor="middle"
-      font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">BF</text>
+      font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">R3D</text>
   </g>
 
   <text x="184" y="125"
-    font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" fill="#ffffff">BlueForge</text>
+    font-family="Inter, Arial, sans-serif" font-size="54" font-weight="800" fill="#ffffff">real3Dmaker</text>
 
   <text x="76" y="244"
     font-family="Inter, Arial, sans-serif" font-size="26" font-weight="800" fill="#0ea5ff"

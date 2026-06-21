@@ -1,4 +1,6 @@
 module.exports = async function handler(request, response) {
+  response.setHeader("Content-Type", "application/json; charset=utf-8");
+
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
     response.status(405).json({ message: "Method not allowed" });
@@ -19,17 +21,23 @@ module.exports = async function handler(request, response) {
     return;
   }
 
-  // Production note: fetch the original order from your DB and compare its amount here.
-  const authorization = Buffer.from(`${secretKey}:`).toString("base64");
-  const tossResponse = await fetch("https://api.tosspayments.com/v1/payments/confirm", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${authorization}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ paymentKey, orderId, amount }),
-  });
+  try {
+    // Production note: fetch the original order from your DB and compare its amount here.
+    const authorization = Buffer.from(`${secretKey}:`).toString("base64");
+    const tossResponse = await fetch("https://api.tosspayments.com/v1/payments/confirm", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${authorization}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ paymentKey, orderId, amount }),
+    });
 
-  const data = await tossResponse.json();
-  response.status(tossResponse.status).json(data);
+    const data = await tossResponse.json().catch(() => ({
+      message: "토스페이먼츠 승인 응답을 읽을 수 없습니다.",
+    }));
+    response.status(tossResponse.status).json(data);
+  } catch {
+    response.status(502).json({ message: "토스페이먼츠 승인 API에 연결할 수 없습니다." });
+  }
 };

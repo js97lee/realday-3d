@@ -241,12 +241,14 @@ article p,
 
 .intro,
 .process,
-.contact {
+.contact,
+.info-section {
   width: min(1180px, 100%);
   margin: 0 auto;
 }
 
-.feature-grid {
+.feature-grid,
+.info-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
@@ -899,6 +901,65 @@ select:focus {
   min-height: 360px;
 }
 
+.policy-hero h1 {
+  max-width: 900px;
+}
+
+.policy-section {
+  padding-top: 48px;
+}
+
+.policy-layout {
+  display: grid;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  gap: 18px;
+}
+
+.policy-layout article {
+  display: grid;
+  gap: 12px;
+}
+
+.policy-layout h2 {
+  margin-bottom: 4px;
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.compact-table {
+  box-shadow: none;
+}
+
+.compact-table div {
+  grid-template-columns: minmax(140px, 0.55fr) minmax(0, 1.45fr);
+}
+
+.policy-list {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding-left: 22px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.contact-box {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  background: #050914;
+  border: 1px solid rgba(14, 165, 255, 0.28);
+  border-radius: 8px;
+}
+
+.contact-box strong {
+  color: var(--white);
+}
+
+.contact-box span {
+  color: var(--muted);
+}
+
 footer {
   display: flex;
   justify-content: space-between;
@@ -959,6 +1020,7 @@ footer strong {
 
   .quick-stats,
   .feature-grid,
+  .info-grid,
   .quote-layout,
   .order-layout,
   .process-list {

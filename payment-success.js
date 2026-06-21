@@ -12,11 +12,12 @@ const successOrderEstimate = document.querySelector("#successOrderEstimate");
 const successSummaryText = document.querySelector("#successSummaryText");
 const qrCode = document.querySelector("#qrCode");
 const pickupCode = document.querySelector("#pickupCode");
+let confirmedPayment = null;
 
 function getStoredOrder() {
   if (!orderId) return null;
   try {
-    return JSON.parse(sessionStorage.getItem(`blueforge-order-${orderId}`));
+    return JSON.parse(sessionStorage.getItem(`real3dmaker-order-${orderId}`));
   } catch {
     return null;
   }
@@ -47,7 +48,7 @@ function fallbackQr(text) {
 
 function renderQr(order) {
   const payload = JSON.stringify({
-    service: "BlueForge",
+    service: "real3Dmaker",
     orderId,
     paymentKey,
     pickup: order?.pickup || "24H_VISIT",
@@ -69,9 +70,18 @@ function renderQr(order) {
 }
 
 function renderBreakdown(order) {
+  const method = confirmedPayment?.method || (order?.paymentMethod === "CARD" ? "카드/간편결제" : order?.paymentMethod) || "-";
+  const provider =
+    confirmedPayment?.easyPay?.provider ||
+    confirmedPayment?.card?.company ||
+    confirmedPayment?.card?.issuerCode ||
+    "-";
+
   paymentBreakdown.innerHTML = [
     ["주문번호", orderId || "-"],
     ["결제금액", Number.isFinite(amount) ? `${formatter.format(amount)}원` : "-"],
+    ["결제수단", method],
+    ["결제기관", provider],
     ["파일", order?.fileName || "-"],
     ["소재", order?.material || "-"],
     ["수량", `${order?.quantity || "1"}개`],
@@ -81,6 +91,7 @@ function renderBreakdown(order) {
 }
 
 function markConfirmed(order) {
+  renderBreakdown(order);
   confirmMessage.textContent = "결제가 승인되었습니다. 주문이 출력 대기열에 접수되었습니다.";
   paymentStatusText.textContent = "결제 승인 완료. 방문 수령 QR을 확인해주세요.";
   successOrderEstimate.textContent = Number.isFinite(amount) ? `${formatter.format(amount)}원 결제 완료` : "결제 완료";
@@ -108,7 +119,7 @@ async function confirmPayment(order) {
   }
 
   try {
-    const response = await fetch("/api/confirm-payment", {
+    const response = await fetch("api/confirm-payment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -123,9 +134,17 @@ async function confirmPayment(order) {
       return;
     }
 
+    confirmedPayment = data;
+    sessionStorage.setItem(`real3dmaker-payment-${orderId}`, JSON.stringify({
+      paymentKey,
+      orderId,
+      amount,
+      method: data.method,
+      approvedAt: data.approvedAt,
+    }));
     markConfirmed(order);
   } catch {
-    markPending("현재 정적 배포에서는 서버 승인 API를 호출할 수 없습니다. Vercel API 또는 별도 서버 연결이 필요합니다.");
+    markPending("현재 배포에서 서버 승인 API를 호출할 수 없습니다. Netlify Functions 배포와 TOSS_SECRET_KEY 설정이 필요합니다.");
   }
 }
 
