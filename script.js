@@ -372,6 +372,30 @@ function makeSupportPreview(THREE, object) {
   return group;
 }
 
+function makeFallbackPreviewObject(THREE) {
+  const group = new THREE.Group();
+  const bodyMaterial = new THREE.MeshStandardMaterial({
+    color: 0x77b7ff,
+    roughness: 0.52,
+    metalness: 0.04,
+  });
+  const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x1d4ed8 });
+  const base = new THREE.Mesh(new THREE.BoxGeometry(96, 72, 28), bodyMaterial);
+  base.position.z = 14;
+  group.add(base);
+
+  const dome = new THREE.Mesh(new THREE.CylinderGeometry(22, 34, 34, 28), bodyMaterial);
+  dome.position.set(-18, 2, 48);
+  group.add(dome);
+
+  const tower = new THREE.Mesh(new THREE.BoxGeometry(26, 22, 58), bodyMaterial);
+  tower.position.set(30, -12, 57);
+  group.add(tower);
+
+  group.add(new THREE.LineSegments(new THREE.EdgesGeometry(base.geometry), edgeMaterial));
+  return group;
+}
+
 function applyPreviewMode() {
   if (!modelViewer) return;
   modelViewer.object.traverse((child) => {
@@ -427,22 +451,16 @@ async function renderModelPreview(file) {
   const extension = getExtension(file.name);
   resetModelViewer();
 
-  if (["step", "stp"].includes(extension)) {
-    setPreviewStatus(
-      "STEP 파일은 주문 접수 후 변환 단계에서 확인합니다.",
-      "STEP/STP는 서버 변환이 필요합니다.",
-      "브라우저 미리보기는 STL, OBJ, 3MF, AMF 파일을 지원합니다.",
-      "is-error"
-    );
-    return;
-  }
-
   if (!["stl", "obj", "3mf", "amf"].includes(extension)) {
-    setPreviewStatus("미리보기를 지원하지 않는 파일입니다.", "확인 필요", "STL, OBJ, 3MF, AMF 파일을 올려주세요.", "is-error");
-    return;
+    setPreviewStatus(
+      file.name,
+      "정확한 모델 렌더링 대신 출력 공간 기준 미리보기를 표시합니다.",
+      "STEP/STP 파일과 일부 복합 3MF는 접수 후 슬라이서에서 실제 형상을 확인합니다.",
+      "is-ready"
+    );
+  } else {
+    setPreviewStatus("모델을 불러오는 중입니다.", "3D 파일을 웹에서 자동 렌더링 중입니다.", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
   }
-
-  setPreviewStatus("모델을 불러오는 중입니다.", "3D 파일을 웹에서 자동 렌더링 중입니다.", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
 
   try {
     const THREE = await import("three");
@@ -480,7 +498,19 @@ async function renderModelPreview(file) {
     scene.add(rimLight);
     scene.add(makeBuildPlate(THREE));
 
-    const object = preparePreviewObject(THREE, await loadPreviewObject(file, extension, THREE));
+    let object;
+    let fallback = false;
+    try {
+      object = ["stl", "obj", "3mf", "amf"].includes(extension)
+        ? await loadPreviewObject(file, extension, THREE)
+        : makeFallbackPreviewObject(THREE);
+    } catch (error) {
+      console.warn("Real3DMaker preview fallback:", error);
+      object = makeFallbackPreviewObject(THREE);
+      fallback = true;
+    }
+
+    object = preparePreviewObject(THREE, object);
     scene.add(object);
     fitObjectToView(THREE, object, camera, controls);
     const supportGroup = makeSupportPreview(THREE, object);
@@ -506,9 +536,19 @@ async function renderModelPreview(file) {
     applyPreviewMode();
     window.addEventListener("resize", resize);
     animate();
-    setPreviewStatus(file.name, "자동 시뮬레이션 생성 완료", "마우스로 회전하고 휠로 확대할 수 있습니다.", "is-ready");
+    setPreviewStatus(
+      file.name,
+      fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
+        ? "파일은 접수됐고, 대체 출력 시뮬레이션을 표시합니다."
+        : "자동 시뮬레이션 생성 완료",
+      fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
+        ? "정확한 형상은 주문 접수 후 Bambu 슬라이서에서 확인합니다. 마우스로 회전하고 휠로 확대할 수 있습니다."
+        : "마우스로 회전하고 휠로 확대할 수 있습니다.",
+      "is-ready"
+    );
     applyPreviewMode();
   } catch (error) {
+    console.error("Real3DMaker preview failed:", error);
     resetModelViewer();
     setPreviewStatus(
       "모델 미리보기를 불러오지 못했습니다.",
