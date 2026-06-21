@@ -22,8 +22,7 @@ exports.handler = async (event) => {
     return json(202, {
       ok: false,
       mode: "browser-estimate",
-      message:
-        "REAL3DMAKER_SLICER_ENDPOINT가 아직 설정되지 않아 브라우저 예측 견적을 사용합니다.",
+      message: "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산합니다.",
     });
   }
 

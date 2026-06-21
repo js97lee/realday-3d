@@ -233,8 +233,8 @@ async function requestSlicerEstimate(file) {
     if (response.status === 202 || data?.mode === "browser-estimate") {
       setSlicerStatus(
         "is-pending",
-        "브라우저 예측 견적 사용 중",
-        data?.message || "슬라이서 워커가 아직 연결되지 않아 현재 입력값 기반 견적을 사용합니다."
+        "예상 견적 계산 완료",
+        data?.message || "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산했습니다."
       );
       return;
     }
@@ -248,8 +248,8 @@ async function requestSlicerEstimate(file) {
     if (requestId !== slicerRequestId) return;
     setSlicerStatus(
       "is-error",
-      "정밀 슬라이싱 연결 실패",
-      error?.message || "현재는 브라우저 예측 견적으로 계속 진행합니다."
+      "예상 견적 계산 중",
+      "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산합니다."
     );
   }
 }
@@ -623,8 +623,8 @@ function clearUploadedFile() {
   );
   setSlicerStatus(
     "is-pending",
-    "Bambu Studio 워커 연결 대기",
-    "파일을 올리면 서버 기반 슬라이싱 견적을 요청하고, 연결 전에는 브라우저 예측 견적을 사용합니다."
+    "파일 업로드 대기",
+    "모델 파일을 올리면 파일 정보와 선택한 출력 조건을 기준으로 예상 견적을 계산합니다."
   );
   calculate();
 }
