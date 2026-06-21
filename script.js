@@ -24,6 +24,7 @@ const breakdown = document.querySelector("#breakdown");
 const quoteMail = document.querySelector("#quoteMail");
 const modelFile = document.querySelector("#modelFile");
 const fileDrop = document.querySelector("#fileDrop");
+const samplePreview = document.querySelector("#samplePreview");
 const fileStatus = document.querySelector("#fileStatus");
 const fileName = document.querySelector("#fileName");
 const fileMeta = document.querySelector("#fileMeta");
@@ -61,6 +62,12 @@ const formatter = new Intl.NumberFormat("ko-KR", {
 function valueOf(id) {
   const element = document.querySelector(`#${id}`);
   return element.type === "checkbox" ? element.checked : element.value;
+}
+
+function setText(element, value) {
+  if (element) {
+    element.textContent = value;
+  }
 }
 
 function roundPrice(price) {
@@ -151,10 +158,10 @@ function applyFileInfo(info) {
 }
 
 function setPreviewStatus(title, hint, note, state = "") {
-  modelPreviewTitle.textContent = title;
-  simulationHint.textContent = hint;
+  setText(modelPreviewTitle, title);
+  setText(simulationHint, hint);
   simulationHint.className = `simulation-hint ${state}`;
-  modelPreviewNote.textContent = note;
+  setText(modelPreviewNote, note);
 }
 
 function setSlicerStatus(state, title, message) {
@@ -396,6 +403,39 @@ function makeFallbackPreviewObject(THREE) {
   return group;
 }
 
+function makeSamplePreviewObject(THREE) {
+  const group = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x77b7ff,
+    roughness: 0.5,
+    metalness: 0.04,
+  });
+  const accent = new THREE.MeshStandardMaterial({
+    color: 0x246bfe,
+    roughness: 0.58,
+    metalness: 0.03,
+  });
+
+  const base = new THREE.Mesh(new THREE.BoxGeometry(92, 68, 20), material);
+  base.position.z = 10;
+  group.add(base);
+
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(26, 6, 18, 48), accent);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.set(-18, 0, 38);
+  group.add(ring);
+
+  const column = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 54, 32), material);
+  column.position.set(30, -8, 47);
+  group.add(column);
+
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(18, 32, 16), accent);
+  cap.position.set(30, -8, 80);
+  group.add(cap);
+
+  return group;
+}
+
 function applyPreviewMode() {
   if (!modelViewer) return;
   modelViewer.object.traverse((child) => {
@@ -411,8 +451,8 @@ function applyPreviewMode() {
   }
   simulationHint.textContent =
     previewMode === "print"
-      ? "웹사이트가 업로드된 파일을 기준으로 실제 출력 상태를 자동 시뮬레이션합니다."
-      : "업로드된 원본 모델을 빌드 플레이트 위에서 자동 렌더링하고 있습니다.";
+      ? "서포트 예상 형태를 함께 표시합니다."
+      : "드래그 회전 · 휠 확대/축소";
 }
 
 async function loadPreviewObject(file, extension, THREE) {
@@ -454,12 +494,12 @@ async function renderModelPreview(file) {
   if (!["stl", "obj", "3mf", "amf"].includes(extension)) {
     setPreviewStatus(
       file.name,
-      "정확한 모델 렌더링 대신 출력 공간 기준 미리보기를 표시합니다.",
-      "STEP/STP 파일과 일부 복합 3MF는 접수 후 슬라이서에서 실제 형상을 확인합니다.",
+      "파일을 받았습니다.",
+      "이 형식은 접수 후 실제 형상을 확인합니다.",
       "is-ready"
     );
   } else {
-    setPreviewStatus("모델을 불러오는 중입니다.", "3D 파일을 웹에서 자동 렌더링 중입니다.", "파일 크기에 따라 몇 초 걸릴 수 있습니다.");
+    setPreviewStatus("모델을 불러오는 중입니다.", "잠시만 기다려주세요.", "드래그 회전 · 휠 확대/축소");
   }
 
   try {
@@ -544,10 +584,10 @@ async function renderModelPreview(file) {
       file.name,
       fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
         ? "파일은 접수됐고, 대체 출력 시뮬레이션을 표시합니다."
-        : "자동 시뮬레이션 생성 완료",
+        : "미리보기 준비 완료",
       fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
-        ? "정확한 형상은 주문 접수 후 Bambu 슬라이서에서 확인합니다. 마우스로 회전하고 휠로 확대할 수 있습니다."
-        : "마우스로 회전하고 휠로 확대할 수 있습니다.",
+        ? "정확한 형상은 주문 접수 후 확인합니다."
+        : "드래그 회전 · 휠 확대/축소",
       "is-ready"
     );
     applyPreviewMode();
@@ -560,6 +600,79 @@ async function renderModelPreview(file) {
       "파일이 손상됐거나 브라우저에서 바로 읽기 어려운 형식입니다. 주문 접수 후 변환 단계에서 확인합니다.",
       "is-error"
     );
+  }
+}
+
+async function renderSamplePreview() {
+  resetModelViewer();
+  activeSlicerQuote = null;
+  uploadedFileInfo = null;
+  modelFile.value = "";
+  fileStatus.hidden = true;
+  resultFileCheck.textContent = "샘플 모델은 조작 예시입니다. 견적은 파일을 올리면 계산됩니다.";
+  detailSize.textContent = "-";
+  calculate();
+  setPreviewStatus("샘플 모델", "드래그 회전 · 휠 확대/축소", "실제 견적은 파일 업로드 후 계산됩니다.", "is-ready");
+
+  try {
+    const THREE = await import("three");
+    const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf7f7f7);
+    const bounds = modelStage.getBoundingClientRect();
+    const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
+    const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(width, height);
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+    renderer.domElement.style.touchAction = "none";
+    renderer.domElement.style.cursor = "grab";
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    modelStage.append(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.screenSpacePanning = true;
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 2.4));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+    keyLight.position.set(4, 6, 7);
+    scene.add(keyLight);
+    scene.add(makeBuildPlate(THREE));
+
+    const object = preparePreviewObject(THREE, makeSamplePreviewObject(THREE));
+    scene.add(object);
+    fitObjectToView(THREE, object, camera, controls);
+    modelPlaceholder.hidden = true;
+
+    const resize = () => {
+      const nextBounds = modelStage.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.round(nextBounds.width || modelStage.clientWidth || width));
+      const nextHeight = Math.max(1, Math.round(nextBounds.height || modelStage.clientHeight || height));
+      camera.aspect = nextWidth / nextHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nextWidth, nextHeight);
+    };
+    const animate = () => {
+      controls.update();
+      renderer.render(scene, camera);
+      modelViewer.frame = requestAnimationFrame(animate);
+    };
+
+    modelViewer = { scene, renderer, controls, resize, frame: 0, object, supportGroup: null };
+    window.addEventListener("resize", resize);
+    animate();
+  } catch (error) {
+    console.error("Real3DMaker sample preview failed:", error);
+    resetModelViewer();
+    setPreviewStatus("샘플을 열지 못했습니다.", "파일을 직접 올려주세요.", "브라우저가 3D 렌더링을 지원하지 않을 수 있습니다.", "is-error");
   }
 }
 
@@ -617,14 +730,14 @@ function clearUploadedFile() {
   fileMeta.textContent = "파일을 올리면 확인 정보가 표시됩니다.";
   resultFileCheck.textContent = "3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.";
   setPreviewStatus(
-    "파일을 올리면 모델이 표시됩니다.",
-    "STL, OBJ, 3MF, AMF 파일은 웹에서 바로 자동 렌더링됩니다.",
-    "STEP/STP 파일은 주문 접수 후 변환 단계에서 확인합니다."
+    "파일을 올리거나 샘플을 열어보세요.",
+    "드래그 회전 · 휠 확대/축소",
+    "실제 출력 가능 여부는 주문 접수 후 최종 확인합니다."
   );
   setSlicerStatus(
     "is-pending",
     "파일 업로드 대기",
-    "모델 파일을 올리면 파일 정보와 선택한 출력 조건을 기준으로 예상 견적을 계산합니다."
+    "파일을 올리면 예상 견적을 계산합니다."
   );
   calculate();
 }
@@ -646,10 +759,10 @@ function calculate() {
     estimate.textContent = formatter.format(0);
     detailMaterial.textContent = material.label;
     detailWeight.textContent = `${weight}g`;
-    detailInfill.textContent = support ? "보통" : "낮음";
-    detailQuality.textContent = layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal";
-    detailTime.textContent = `${hours}시간`;
-    detailQuantity.textContent = `${quantity}개`;
+    setText(detailInfill, support ? "보통" : "낮음");
+    setText(detailQuality, layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal");
+    setText(detailTime, `${hours}시간`);
+    setText(detailQuantity, `${quantity}개`);
     detailPrice.textContent = formatter.format(0);
     note.textContent = "3D 모델 파일을 올리면 파일 정보와 출력 조건을 기준으로 견적을 계산합니다.";
     breakdown.innerHTML = [
@@ -686,10 +799,10 @@ function calculate() {
   estimate.textContent = formatter.format(finalTotal);
   detailMaterial.textContent = material.label;
   detailWeight.textContent = `${weight}g`;
-  detailInfill.textContent = support ? "보통" : "낮음";
-  detailQuality.textContent = layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal";
-  detailTime.textContent = `${hours}시간`;
-  detailQuantity.textContent = `${quantity}개`;
+  setText(detailInfill, support ? "보통" : "낮음");
+  setText(detailQuality, layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal");
+  setText(detailTime, `${hours}시간`);
+  setText(detailQuantity, `${quantity}개`);
   detailPrice.textContent = formatter.format(finalTotal);
   note.textContent =
     activeSlicerQuote?.total && activeSlicerQuote.total > 0
@@ -776,6 +889,7 @@ modelFile.addEventListener("change", () => {
   }
 });
 clearFile.addEventListener("click", clearUploadedFile);
+samplePreview?.addEventListener("click", renderSamplePreview);
 
 ["dragenter", "dragover"].forEach((eventName) => {
   fileDrop.addEventListener(eventName, (event) => {

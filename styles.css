@@ -333,9 +333,9 @@ article {
   grid-template-columns: auto 1fr auto;
   gap: 10px 16px !important;
   align-items: center;
-  min-height: 132px;
-  padding: 22px;
-  background: linear-gradient(135deg, rgba(36, 107, 254, 0.16), rgba(14, 165, 255, 0.05));
+  min-height: 108px;
+  padding: 18px;
+  background: rgba(36, 107, 254, 0.12);
   border: 1px dashed rgba(142, 198, 255, 0.5);
   border-radius: 8px;
   cursor: pointer;
@@ -344,7 +344,7 @@ article {
 .file-drop:hover,
 .file-drop.is-dragover {
   border-color: var(--blue-2);
-  background: linear-gradient(135deg, rgba(36, 107, 254, 0.24), rgba(14, 165, 255, 0.09));
+  background: rgba(36, 107, 254, 0.2);
 }
 
 .file-drop input {
@@ -369,7 +369,7 @@ article {
 
 .file-title {
   color: var(--white);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
 }
 
@@ -389,6 +389,36 @@ article {
   border-radius: 8px;
   color: var(--white);
   font-weight: 800;
+}
+
+.preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -8px;
+}
+
+.preview-actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--white);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.preview-actions button:hover {
+  border-color: rgba(142, 198, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.preview-actions span {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .file-status {
@@ -435,7 +465,7 @@ article {
 
 .model-preview {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   padding: 18px;
   background: #f8fafc;
   border: 1px solid rgba(15, 23, 42, 0.13);
@@ -460,44 +490,13 @@ article {
   color: var(--blue);
 }
 
-.model-preview-actions {
-  display: inline-flex;
-  overflow: hidden;
-  background: #fff;
-  border: 2px solid var(--blue);
-  border-radius: 999px;
-}
-
-.model-preview-actions button {
-  align-items: center;
-  min-height: 42px;
-  padding: 0 18px;
-  background: transparent;
-  border: 0;
-  color: var(--blue);
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.model-preview-actions button.is-active {
-  background: var(--blue);
-  color: #fff;
-}
-
 .simulation-hint {
-  justify-self: end;
-  margin: -4px 0 0;
-  padding: 10px 14px;
-  background: #fff;
-  border-radius: 8px;
+  justify-self: start;
+  margin: -2px 0 0;
   color: var(--blue);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.45;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .simulation-hint.is-ready {
@@ -510,11 +509,11 @@ article {
 
 .model-stage {
   position: relative;
-  height: min(58vh, 620px);
-  min-height: 420px;
+  height: min(48vh, 520px);
+  min-height: 340px;
   overflow: hidden;
   background: #f7f7f7;
-  border: 3px solid var(--blue);
+  border: 2px solid rgba(36, 107, 254, 0.74);
   border-radius: 8px;
   touch-action: none;
 }
@@ -568,17 +567,20 @@ article {
 
 .simulation-details {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 28px;
-  padding: 18px 14px 4px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 0 0;
   color: #111827;
 }
 
 .simulation-details div {
   display: grid;
-  grid-template-columns: 0.78fr 1.22fr;
-  gap: 14px;
-  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 8px;
 }
 
 .simulation-details span {
@@ -589,6 +591,7 @@ article {
 .simulation-details strong {
   color: #666;
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .simulation-details #detailPrice {
