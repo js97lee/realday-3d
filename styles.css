@@ -525,7 +525,12 @@ article {
   height: 100%;
   opacity: 1;
   touch-action: none;
+  cursor: grab;
   transition: opacity 0.2s;
+}
+
+.model-stage canvas:active {
+  cursor: grabbing;
 }
 
 .model-placeholder {
@@ -537,6 +542,11 @@ article {
   padding: 24px;
   color: #6b7280;
   text-align: center;
+  pointer-events: none;
+}
+
+.model-placeholder[hidden] {
+  display: none;
 }
 
 .model-placeholder span {

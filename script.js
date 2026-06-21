@@ -481,12 +481,16 @@ async function renderModelPreview(file) {
     renderer.domElement.style.opacity = "1";
     renderer.domElement.style.transition = "opacity 0.2s";
     renderer.domElement.style.touchAction = "none";
+    renderer.domElement.style.cursor = "grab";
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     modelStage.append(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    controls.enableRotate = true;
+    controls.enableZoom = true;
+    controls.enablePan = true;
     controls.screenSpacePanning = true;
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0xcbd5e1, 2.4));
@@ -638,6 +642,31 @@ function calculate() {
   const rush = valueOf("rush");
   const fileReviewCost = uploadedFileInfo ? 3000 : 0;
 
+  if (!uploadedFileInfo) {
+    estimate.textContent = formatter.format(0);
+    detailMaterial.textContent = material.label;
+    detailWeight.textContent = `${weight}g`;
+    detailInfill.textContent = support ? "보통" : "낮음";
+    detailQuality.textContent = layer.label.includes("정밀") ? "Fine" : layer.label.includes("빠른") ? "Draft" : "Normal";
+    detailTime.textContent = `${hours}시간`;
+    detailQuantity.textContent = `${quantity}개`;
+    detailPrice.textContent = formatter.format(0);
+    note.textContent = "3D 모델 파일을 올리면 파일 정보와 출력 조건을 기준으로 견적을 계산합니다.";
+    breakdown.innerHTML = [
+      ["소재", material.label],
+      ["적층", layer.label],
+      ["재료/장비", "파일 업로드 후 계산"],
+      ["서포트/색상", support || multiColor ? "조건 선택됨" : "기본"],
+      ["후가공/납기", finish.label],
+      ["파일 검토", "미업로드"],
+    ]
+      .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
+      .join("");
+    quoteMail.href = "#quote";
+    quoteMail.setAttribute("aria-disabled", "true");
+    return;
+  }
+
   const setup = 9000;
   const materialCost = weight * material.gram * quantity;
   const machineCost = hours * material.hourly * quantity;
@@ -717,6 +746,7 @@ function calculate() {
     note: decodeURIComponent(body),
   });
   quoteMail.href = `order.html?${orderParams.toString()}`;
+  quoteMail.removeAttribute("aria-disabled");
 }
 
 function handleQuoteFormChange(event) {
