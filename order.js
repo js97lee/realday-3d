@@ -60,7 +60,7 @@ function buildOrderPayload(orderId) {
     fileName,
     material: param("material"),
     quantity: param("quantity", "1"),
-    pickup: document.querySelector("#pickup24").checked ? "24H_VISIT" : "VISIT",
+    pickup: document.querySelector("#pickupMethod").value,
     estimate: param("estimate", ""),
     paymentMethod: document.querySelector("#paymentMethod").value,
     memo: document.querySelector("#paymentMemo").value.trim(),
@@ -92,6 +92,7 @@ function setInitialSummary() {
     ["적층", param("layer")],
     ["서포트", param("support")],
     ["다색 출력", param("multicolor")],
+    ["수령", "택배 또는 현장 수령"],
     ["결제", "선결제 필요"],
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
@@ -150,7 +151,7 @@ function renderQr(orderId) {
   const payload = JSON.stringify({
     service: "Real3DMaker",
     orderId,
-    pickup: "24H_VISIT",
+    pickup: document.querySelector("#pickupMethod").value,
     estimate: param("estimate", ""),
   });
 

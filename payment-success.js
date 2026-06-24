@@ -51,7 +51,7 @@ function renderQr(order) {
     service: "Real3DMaker",
     orderId,
     paymentKey,
-    pickup: order?.pickup || "24H_VISIT",
+    pickup: order?.pickup || "DELIVERY",
   });
 
   qrCode.innerHTML = "";
@@ -76,6 +76,7 @@ function renderBreakdown(order) {
     confirmedPayment?.card?.company ||
     confirmedPayment?.card?.issuerCode ||
     "-";
+  const pickupLabel = order?.pickup === "ONSITE" ? "현장 수령" : "택배 수령";
 
   paymentBreakdown.innerHTML = [
     ["주문번호", orderId || "-"],
@@ -85,6 +86,7 @@ function renderBreakdown(order) {
     ["파일", order?.fileName || "-"],
     ["소재", order?.material || "-"],
     ["수량", `${order?.quantity || "1"}개`],
+    ["수령", pickupLabel],
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
     .join("");
@@ -93,11 +95,14 @@ function renderBreakdown(order) {
 function markConfirmed(order) {
   renderBreakdown(order);
   confirmMessage.textContent = "결제가 승인되었습니다. 주문이 출력 대기열에 접수되었습니다.";
-  paymentStatusText.textContent = "결제 승인 완료. 방문 수령 QR을 확인해주세요.";
+  paymentStatusText.textContent = "결제 승인 완료. 출력 완료 후 수령 방법을 안내드립니다.";
   successOrderEstimate.textContent = Number.isFinite(amount) ? `${formatter.format(amount)}원 결제 완료` : "결제 완료";
-  successSummaryText.textContent = "출력 완료 후 24시간 방문 수령 QR로 픽업합니다.";
+  successSummaryText.textContent =
+    order?.pickup === "ONSITE"
+      ? "출력 완료 후 현장 수령 가능 시간을 연락처로 안내합니다."
+      : "출력 완료 후 택배 발송 정보를 연락처로 안내합니다.";
   pickupCode.textContent = orderId;
-  renderQr(order);
+  qrCode.innerHTML = "<span>24시간 방문 수령 QR은 준비중</span>";
 }
 
 function markPending(reason) {

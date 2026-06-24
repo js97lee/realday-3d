@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Real3DMaker 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 결제, 24시간 방문 수령 QR을 확인합니다."
+      content="Real3DMaker 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 결제, 택배 또는 현장 수령 정보를 확인합니다."
     />
     <title>Real3DMaker | 주문하기</title>
     <meta property="og:type" content="website" />
@@ -36,7 +36,7 @@
       <nav>
         <a href="index.html#quote">견적</a>
         <a href="#simulation">시뮬레이션</a>
-        <a href="#pickup">수령 QR</a>
+        <a href="#pickup">수령 안내</a>
         <a href="policies.html">고객 안내</a>
       </nav>
     </header>
@@ -131,9 +131,12 @@
               <input id="paymentMemo" type="text" placeholder="입금자명 또는 요청사항" />
             </label>
 
-            <label class="check">
-              <input id="pickup24" type="checkbox" checked />
-              <span>24시간 방문 수령으로 진행</span>
+            <label>
+              수령 방식
+              <select id="pickupMethod">
+                <option value="DELIVERY">택배 수령</option>
+                <option value="ONSITE">현장 수령</option>
+              </select>
             </label>
 
             <label class="check">
@@ -157,12 +160,12 @@
             <div class="result-breakdown" id="orderBreakdown"></div>
 
             <div class="pickup-card">
-              <span class="result-label">24시간 방문 수령 QR</span>
+              <span class="result-label">수령 안내</span>
               <div id="qrCode" class="qr-box">
-                <span>결제 완료 후 QR 표시</span>
+                <span>24시간 방문 수령 QR은 준비중</span>
               </div>
-              <strong id="pickupCode">수령 코드 대기</strong>
-              <p>선결제와 출력 접수가 완료되면 방문 수령 시 이 QR 또는 수령 코드를 제시합니다.</p>
+              <strong id="pickupCode">주문번호 대기</strong>
+              <p>현재는 출력 완료 후 택배 또는 현장 수령 방법을 연락처로 안내합니다.</p>
             </div>
           </aside>
         </div>
