@@ -8,6 +8,7 @@ Real3DMaker focuses on small-batch custom 3D printing using PLA and PETG materia
 
 - [Home and Quote](https://real3dmaker.com/): Upload STL, 3MF, OBJ, AMF, STEP, or STP files, preview supported 3D models, and calculate an estimated FDM print quote.
 - [Order](https://real3dmaker.com/order.html): Create an order number, review the KakaoBank transfer account, and choose delivery or on-site pickup.
+- [Order Status](https://real3dmaker.com/order-status.html): Check an order using the order number, customer name, and phone number.
 - [Customer Policies](https://real3dmaker.com/policies.html): Business information, available materials, order flow, pickup guide, cancellation, and refund policy.
 
 ## Service Facts

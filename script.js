@@ -641,6 +641,23 @@ function applyPreviewMode() {
       : "드래그 회전 · 휠 확대/축소";
 }
 
+function savePreviewSnapshot() {
+  const canvas = modelStage.querySelector("canvas");
+  if (!canvas) {
+    sessionStorage.removeItem("real3dmaker-preview-image");
+    return;
+  }
+
+  const maxWidth = 640;
+  const ratio = Math.min(1, maxWidth / canvas.width);
+  const target = document.createElement("canvas");
+  target.width = Math.max(1, Math.round(canvas.width * ratio));
+  target.height = Math.max(1, Math.round(canvas.height * ratio));
+  const context = target.getContext("2d");
+  context.drawImage(canvas, 0, 0, target.width, target.height);
+  sessionStorage.setItem("real3dmaker-preview-image", target.toDataURL("image/png"));
+}
+
 async function loadPreviewObject(file, extension, THREE) {
   if (extension === "stl") {
     const { STLLoader } = await import("three/addons/loaders/STLLoader.js");
@@ -1069,6 +1086,7 @@ modelFile.addEventListener("change", () => {
 });
 clearFile.addEventListener("click", clearUploadedFile);
 samplePreview?.addEventListener("click", renderSamplePreview);
+quoteMail.addEventListener("click", savePreviewSnapshot);
 
 ["dragenter", "dragover"].forEach((eventName) => {
   fileDrop.addEventListener(eventName, (event) => {

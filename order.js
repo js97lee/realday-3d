@@ -56,6 +56,7 @@ function createOrderId() {
 function buildOrderPayload(orderId) {
   const amount = parseEstimateAmount();
   const fileName = orderFileName.textContent || param("file", "3D 모델 파일");
+  const [selectedFile] = orderModelFile.files;
 
   return {
     orderId,
@@ -64,8 +65,17 @@ function buildOrderPayload(orderId) {
     customerName: document.querySelector("#customerName").value.trim(),
     customerMobilePhone: cleanPhone(document.querySelector("#customerPhone").value),
     fileName,
+    fileSizeText: selectedFile ? formatFile(selectedFile).split(" · ").slice(1).join(" · ") : param("fileSize", "-"),
     material: param("material"),
+    weight: param("weight", "-"),
     quantity: param("quantity", "1"),
+    hours: param("hours", "-"),
+    maxSize: param("maxSize", "-"),
+    layer: param("layer", "-"),
+    finish: param("finish", "-"),
+    support: param("support", "-"),
+    multicolor: param("multicolor", "-"),
+    rush: param("rush", "-"),
     pickup: document.querySelector("#pickupMethod").value,
     estimate: param("estimate", ""),
     paymentMethod: document.querySelector("#paymentMethod").value,
@@ -73,6 +83,7 @@ function buildOrderPayload(orderId) {
     bankName: bankTransfer.bankName,
     bankAccountNumber: bankTransfer.accountNumber,
     memo: document.querySelector("#paymentMemo").value.trim(),
+    previewImageDataUrl: sessionStorage.getItem("real3dmaker-preview-image") || "",
   };
 }
 
@@ -115,6 +126,10 @@ function renderBankTransfer(payload) {
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
     .join("");
+}
+
+function statusUrl(orderId) {
+  return `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, "")}order-status.html?orderId=${encodeURIComponent(orderId)}`;
 }
 
 async function notifyOrder(payload) {
@@ -204,6 +219,9 @@ orderForm.addEventListener("submit", async (event) => {
     const result = await notifyOrder(payload);
     if (result.notification === "telegram-sent") {
       paymentNotice.textContent += " 주문 알림도 전송되었습니다.";
+    }
+    if (result.stored) {
+      paymentNotice.innerHTML += ` <a href="${statusUrl(payload.orderId)}">주문 상태 조회</a>`;
     }
   } catch {
     paymentNotice.textContent += " 주문 알림 전송은 나중에 다시 확인해주세요.";

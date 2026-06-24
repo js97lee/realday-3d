@@ -1,3 +1,5 @@
+const { getStore } = require("@netlify/blobs");
+
 const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
 
 function formatCurrency(value) {
@@ -14,6 +16,7 @@ function trim(value, fallback = "-") {
 }
 
 function buildTelegramMessage(order) {
+  const statusUrl = `https://real3dmaker.com/order-status.html?orderId=${encodeURIComponent(trim(order?.orderId, ""))}`;
   const lines = [
     "Real3DMaker 새 주문",
     "",
@@ -25,8 +28,16 @@ function buildTelegramMessage(order) {
     `연락처: ${trim(order?.customerMobilePhone)}`,
     `수령: ${pickupLabel(order?.pickup)}`,
     `파일: ${trim(order?.fileName)}`,
+    `파일크기: ${trim(order?.fileSizeText)}`,
     `소재: ${trim(order?.material)}`,
     `수량: ${trim(order?.quantity, "1")}개`,
+    `출력시간: ${trim(order?.hours)}시간`,
+    `최대치수: ${trim(order?.maxSize)}mm`,
+    `적층: ${trim(order?.layer)}`,
+    `서포트: ${trim(order?.support)}`,
+    `다색출력: ${trim(order?.multicolor)}`,
+    `후가공: ${trim(order?.finish)}`,
+    `조회: ${statusUrl}`,
   ];
 
   if (order?.memo) {
@@ -36,7 +47,7 @@ function buildTelegramMessage(order) {
   return lines.join("\n");
 }
 
-async function notifyTelegram(message) {
+async function notifyTelegram(message, order) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -55,7 +66,61 @@ async function notifyTelegram(message) {
   });
 
   const data = await response.json().catch(() => ({}));
+
+  if (response.ok && order?.previewImageDataUrl) {
+    try {
+      await sendTelegramPhoto({ token, chatId, order });
+    } catch {
+      // Text notification is more important than the optional preview image.
+    }
+  }
+
   return { ok: response.ok, status: response.status, data };
+}
+
+async function sendTelegramPhoto({ token, chatId, order }) {
+  const match = String(order.previewImageDataUrl).match(/^data:image\/(png|jpeg);base64,(.+)$/);
+  if (!match) return { ok: false, skipped: true };
+
+  const mimeType = match[1] === "jpeg" ? "image/jpeg" : "image/png";
+  const bytes = Buffer.from(match[2], "base64");
+  const formData = new FormData();
+  formData.append("chat_id", chatId);
+  formData.append("caption", `모델 미리보기 · ${trim(order.fileName)} · ${trim(order.orderId)}`);
+  formData.append("photo", new Blob([bytes], { type: mimeType }), `${trim(order.orderId, "preview")}.png`);
+
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+    method: "POST",
+    body: formData,
+  });
+  const data = await response.json().catch(() => ({}));
+  return { ok: response.ok, status: response.status, data };
+}
+
+function normalizePhone(value) {
+  return String(value || "").replace(/[^\d]/g, "");
+}
+
+function stripPrivateFields(order) {
+  const { previewImageDataUrl, ...storedOrder } = order;
+  return storedOrder;
+}
+
+async function saveOrder(order) {
+  const store = getStore("real3dmaker-orders");
+  const now = new Date().toISOString();
+  const storedOrder = {
+    ...stripPrivateFields(order),
+    status: order.status || "입금 대기",
+    statusMessage: order.statusMessage || "주문번호가 생성되었습니다. 입금 확인 후 제작 가능 여부를 안내합니다.",
+    createdAt: order.createdAt || now,
+    updatedAt: now,
+    customerNameKey: trim(order.customerName, "").toLocaleLowerCase("ko-KR"),
+    customerPhoneKey: normalizePhone(order.customerMobilePhone),
+    hasPreviewImage: Boolean(order.previewImageDataUrl),
+  };
+  await store.setJSON(order.orderId, storedOrder);
+  return storedOrder;
 }
 
 exports.handler = async (event) => {
@@ -88,12 +153,24 @@ exports.handler = async (event) => {
   }
 
   try {
-    const notification = await notifyTelegram(buildTelegramMessage(order));
+    let stored = false;
+    let status = order.status || "입금 대기";
+    try {
+      const savedOrder = await saveOrder(order);
+      stored = true;
+      status = savedOrder.status;
+    } catch {
+      stored = false;
+    }
+
+    const notification = await notifyTelegram(buildTelegramMessage(order), order);
     return {
       statusCode: 200,
       headers: jsonHeaders,
       body: JSON.stringify({
         ok: true,
+        stored,
+        status,
         notification: notification.ok
           ? "telegram-sent"
           : notification.skipped

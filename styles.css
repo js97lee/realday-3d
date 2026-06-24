@@ -1027,7 +1027,7 @@ select:focus {
 .qr-box {
   display: grid;
   width: 100%;
-  min-height: 176px;
+  min-height: 124px;
   margin: 0;
   place-items: center;
   background: var(--white);
@@ -1047,8 +1047,8 @@ select:focus {
 
 .bank-transfer-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 176px;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 124px;
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -1089,8 +1089,8 @@ select:focus {
 
 .qr-box img,
 .qr-box canvas {
-  width: 148px;
-  height: 148px;
+  width: 104px;
+  height: 104px;
 }
 
 #pickupCode {
@@ -1319,13 +1319,13 @@ footer strong {
   }
 
   .qr-box {
-    min-height: 184px;
+    min-height: 132px;
   }
 
   .qr-box img,
   .qr-box canvas {
-    width: 156px;
-    height: 156px;
+    width: 112px;
+    height: 112px;
   }
 
   .button {

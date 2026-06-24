@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Real3DMaker 주문 상태 조회 페이지입니다. 주문번호, 이름, 연락처로 3D 프린팅 주문 접수 상태를 확인합니다."
+    />
+    <title>Real3DMaker | 주문 조회</title>
+    <link rel="canonical" href="https://real3dmaker.com/order-status.html" />
+    <meta name="robots" content="noindex, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://real3dmaker.com/order-status.html" />
+    <meta property="og:title" content="Real3DMaker | 주문 조회" />
+    <meta property="og:description" content="주문번호, 이름, 연락처로 3D 프린팅 주문 상태를 확인합니다." />
+    <meta property="og:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=order-status" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="주요 메뉴">
+      <a class="brand" href="index.html" aria-label="Real3DMaker 홈">
+        <span class="brand-mark">R3D</span>
+        <span>Real3DMaker</span>
+      </a>
+      <nav>
+        <a href="index.html#quote">견적</a>
+        <a href="order.html">주문하기</a>
+        <a href="order-status.html">주문 조회</a>
+        <a href="policies.html">고객 안내</a>
+      </nav>
+    </header>
+
+    <main class="order-page">
+      <section class="section order-hero">
+        <div class="section-heading">
+          <p class="eyebrow">Order Status</p>
+          <h1>주문 상태 조회.</h1>
+          <p>
+            주문번호와 주문자 정보를 입력하면 입금 대기, 파일 확인, 제작 준비 상태를 확인할 수 있습니다.
+          </p>
+        </div>
+      </section>
+
+      <section class="section order-section">
+        <div class="order-layout">
+          <form class="quote-form order-form" id="orderStatusForm">
+            <div class="order-step">
+              <span>1</span>
+              <div>
+                <h2>주문 정보 입력</h2>
+                <p>주문번호, 이름, 연락처가 주문 접수 정보와 일치해야 조회됩니다.</p>
+              </div>
+            </div>
+
+            <label>
+              주문번호
+              <input id="statusOrderId" type="text" placeholder="R3D-YYYYMMDD-XXXXXX" required />
+            </label>
+
+            <div class="field-row">
+              <label>
+                이름
+                <input id="statusCustomerName" type="text" placeholder="주문자명" required />
+              </label>
+              <label>
+                연락처
+                <input id="statusCustomerPhone" type="tel" placeholder="주문 시 입력한 번호" required />
+              </label>
+            </div>
+
+            <button class="button primary wide" type="submit">
+              <span aria-hidden="true">✓</span>
+              조회하기
+            </button>
+            <p class="payment-notice" id="statusNotice">주문번호는 입금 안내 영역에서 확인할 수 있습니다.</p>
+          </form>
+
+          <aside class="quote-result order-summary">
+            <span class="result-label">조회 결과</span>
+            <strong id="statusTitle">주문 정보를 입력해주세요</strong>
+            <p id="statusSummaryText">조회 결과가 여기에 표시됩니다.</p>
+
+            <div class="order-number-box" id="statusBadge" hidden>
+              <span>현재 상태</span>
+              <strong id="statusCurrent">-</strong>
+            </div>
+
+            <div class="result-breakdown" id="statusBreakdown"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <strong>리얼데이</strong>
+        <span>Real3DMaker 운영</span>
+      </div>
+      <div class="footer-info">
+        <span>상호: 리얼데이</span>
+        <span>대표자: 이지수</span>
+        <span>사업자등록번호: 146-11-03027</span>
+        <span>통신판매업: 제 2025-서울광진-1581 호</span>
+        <span>이메일: studio.realday@gmail.com</span>
+        <a href="policies.html">환불/취소 및 사업자 정보</a>
+      </div>
+    </footer>
+
+    <script src="order-status.js"></script>
+  </body>
+</html>
