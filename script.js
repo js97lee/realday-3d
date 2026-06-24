@@ -329,7 +329,43 @@ function makeBuildPlate(THREE) {
   ]);
   const border = new THREE.Line(borderGeometry, new THREE.LineBasicMaterial({ color: 0x9ca3af }));
   plate.add(border);
+
+  const axisMaterialX = new THREE.LineBasicMaterial({ color: 0xef4444 });
+  const axisMaterialY = new THREE.LineBasicMaterial({ color: 0x22c55e });
+  const axisLength = size / 2 - 16;
+  const xAxis = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-axisLength, -size / 2 - 8, 0.04),
+      new THREE.Vector3(axisLength, -size / 2 - 8, 0.04),
+    ]),
+    axisMaterialX
+  );
+  const yAxis = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-size / 2 - 8, -axisLength, 0.04),
+      new THREE.Vector3(-size / 2 - 8, axisLength, 0.04),
+    ]),
+    axisMaterialY
+  );
+  plate.add(xAxis, yAxis);
+
   return plate;
+}
+
+function setupPlateCamera(THREE, camera) {
+  camera.up.set(0, 0, 1);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+}
+
+function setupPlateControls(controls) {
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.enableRotate = true;
+  controls.enableZoom = true;
+  controls.enablePan = true;
+  controls.screenSpacePanning = false;
+  controls.minPolarAngle = 0.08;
+  controls.maxPolarAngle = Math.PI / 2 - 0.06;
 }
 
 function getObjectBounds(THREE, object) {
@@ -385,6 +421,7 @@ function fitObjectToView(THREE, object, camera, controls) {
   const distance = Math.max(220, maxDimension * 1.85);
 
   camera.position.set(distance * 0.72, -distance * 0.92, distance * 0.64);
+  setupPlateCamera(THREE, camera);
   camera.near = Math.max(0.1, distance / 1000);
   camera.far = Math.max(2000, distance * 8);
   camera.updateProjectionMatrix();
@@ -669,6 +706,7 @@ async function renderModelPreview(file) {
     const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
     const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
+    setupPlateCamera(THREE, camera);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     setupRenderer(THREE, renderer, width, height);
     renderer.domElement.dataset.engine = "three.js r159";
@@ -681,12 +719,7 @@ async function renderModelPreview(file) {
     modelStage.append(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.enableRotate = true;
-    controls.enableZoom = true;
-    controls.enablePan = true;
-    controls.screenSpacePanning = true;
+    setupPlateControls(controls);
 
     addStudioLights(THREE, scene);
     scene.add(makeBuildPlate(THREE));
@@ -776,6 +809,7 @@ async function renderSamplePreview() {
     const width = Math.max(1, Math.round(bounds.width || modelStage.clientWidth || 720));
     const height = Math.max(1, Math.round(bounds.height || modelStage.clientHeight || 420));
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 10000);
+    setupPlateCamera(THREE, camera);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     setupRenderer(THREE, renderer, width, height);
     renderer.domElement.style.width = "100%";
@@ -785,12 +819,7 @@ async function renderSamplePreview() {
     modelStage.append(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.enableRotate = true;
-    controls.enableZoom = true;
-    controls.enablePan = true;
-    controls.screenSpacePanning = true;
+    setupPlateControls(controls);
 
     addStudioLights(THREE, scene);
     scene.add(makeBuildPlate(THREE));
