@@ -1026,9 +1026,9 @@ select:focus {
 
 .qr-box {
   display: grid;
-  width: 212px;
-  min-height: 212px;
-  margin: 16px 0;
+  width: 100%;
+  min-height: 176px;
+  margin: 0;
   place-items: center;
   background: var(--white);
   border-radius: 8px;
@@ -1045,6 +1045,13 @@ select:focus {
   gap: 14px;
 }
 
+.bank-transfer-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 176px;
+  gap: 14px;
+  align-items: stretch;
+}
+
 .bank-account-box {
   display: grid;
   gap: 8px;
@@ -1052,6 +1059,7 @@ select:focus {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
+  align-content: center;
 }
 
 .bank-account-box span {
@@ -1081,8 +1089,8 @@ select:focus {
 
 .qr-box img,
 .qr-box canvas {
-  width: 180px;
-  height: 180px;
+  width: 148px;
+  height: 148px;
 }
 
 #pickupCode {
@@ -1304,6 +1312,20 @@ footer strong {
   .order-step,
   .simulation-panel {
     grid-template-columns: 1fr;
+  }
+
+  .bank-transfer-main {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-box {
+    min-height: 184px;
+  }
+
+  .qr-box img,
+  .qr-box canvas {
+    width: 156px;
+    height: 156px;
   }
 
   .button {

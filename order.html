@@ -27,7 +27,7 @@
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=qr-bank-layout" />
   </head>
   <body>
     <header class="site-header" aria-label="주요 메뉴">
@@ -168,13 +168,15 @@
                 <strong id="pickupCode">주문번호 대기</strong>
               </div>
               <div class="bank-transfer-card" id="bankTransferCard" hidden>
-                <div class="qr-box">
-                  <img id="bankQrImage" alt="카카오뱅크 송금 정보 QR" />
-                </div>
-                <div class="bank-account-box">
-                  <span>카카오뱅크</span>
-                  <strong id="bankAccountNumber">3333-35-6070100</strong>
-                  <button type="button" id="copyAccountButton">계좌 복사</button>
+                <div class="bank-transfer-main">
+                  <div class="bank-account-box">
+                    <span>카카오뱅크</span>
+                    <strong id="bankAccountNumber">3333-35-6070100</strong>
+                    <button type="button" id="copyAccountButton">계좌 복사</button>
+                  </div>
+                  <div class="qr-box">
+                    <img id="bankQrImage" alt="카카오뱅크 송금 정보 QR" />
+                  </div>
                 </div>
                 <div class="result-breakdown" id="bankTransferBreakdown"></div>
               </div>
