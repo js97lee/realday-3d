@@ -1036,6 +1036,49 @@ select:focus {
   text-align: center;
 }
 
+.bank-transfer-card[hidden] {
+  display: none;
+}
+
+.bank-transfer-card {
+  display: grid;
+  gap: 14px;
+}
+
+.bank-account-box {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+
+.bank-account-box span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.bank-account-box strong {
+  color: var(--white);
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.bank-account-box button {
+  width: fit-content;
+  padding: 9px 12px;
+  color: var(--white);
+  background: rgba(36, 107, 254, 0.22);
+  border: 1px solid rgba(142, 198, 255, 0.38);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .qr-box img,
 .qr-box canvas {
   width: 180px;

@@ -11,9 +11,16 @@ const simulationPanel = document.querySelector("#simulationPanel");
 const orderForm = document.querySelector("#orderForm");
 const pickupCode = document.querySelector("#pickupCode");
 const paymentNotice = document.querySelector("#paymentNotice");
+const bankTransferCard = document.querySelector("#bankTransferCard");
+const bankQrImage = document.querySelector("#bankQrImage");
+const bankTransferBreakdown = document.querySelector("#bankTransferBreakdown");
+const bankTransferHelp = document.querySelector("#bankTransferHelp");
+const copyAccountButton = document.querySelector("#copyAccountButton");
 
-const paymentConfig = window.REAL3DMAKER_PAYMENT || window.BLUEFORGE_PAYMENT || {};
-const basePath = window.location.pathname.replace(/[^/]*$/, "");
+const bankTransfer = {
+  bankName: "카카오뱅크",
+  accountNumber: "3333-35-6070100",
+};
 
 function param(name, fallback = "-") {
   return params.get(name) || fallback;
@@ -28,7 +35,7 @@ function formatFile(file) {
 function parseEstimateAmount() {
   const estimate = param("estimate", "0");
   const parsed = Number(String(estimate).replace(/[^\d]/g, ""));
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1000;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
 function cleanPhone(value) {
@@ -62,17 +69,64 @@ function buildOrderPayload(orderId) {
     pickup: document.querySelector("#pickupMethod").value,
     estimate: param("estimate", ""),
     paymentMethod: document.querySelector("#paymentMethod").value,
+    paymentStatus: "입금 대기",
+    bankName: bankTransfer.bankName,
+    bankAccountNumber: bankTransfer.accountNumber,
     memo: document.querySelector("#paymentMemo").value.trim(),
   };
-}
-
-function getReturnUrl(page) {
-  return `${window.location.origin}${basePath}${page}`;
 }
 
 function savePendingOrder(payload) {
   sessionStorage.setItem(`real3dmaker-order-${payload.orderId}`, JSON.stringify(payload));
   sessionStorage.setItem("real3dmaker-last-order", JSON.stringify(payload));
+}
+
+function buildQrText(payload) {
+  return [
+    "Real3DMaker 입금 안내",
+    `주문번호: ${payload.orderId}`,
+    `은행: ${bankTransfer.bankName}`,
+    `계좌: ${bankTransfer.accountNumber}`,
+    `금액: ${formatter.format(payload.amount)}원`,
+    `입금자: ${payload.customerName}`,
+  ].join("\n");
+}
+
+function qrImageUrl(payload) {
+  const data = encodeURIComponent(buildQrText(payload));
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${data}`;
+}
+
+function pickupLabel(value) {
+  return value === "ONSITE" ? "현장 수령" : "택배 수령";
+}
+
+function renderBankTransfer(payload) {
+  pickupCode.textContent = payload.orderId;
+  bankQrImage.src = qrImageUrl(payload);
+  bankTransferCard.hidden = false;
+  bankTransferHelp.textContent = "QR에는 송금에 필요한 주문번호, 계좌, 금액 정보가 들어 있습니다. 은행앱에서 금액과 계좌를 한 번 더 확인해주세요.";
+  bankTransferBreakdown.innerHTML = [
+    ["입금은행", bankTransfer.bankName],
+    ["입금계좌", bankTransfer.accountNumber],
+    ["입금금액", `${formatter.format(payload.amount)}원`],
+    ["입금자명", payload.customerName || "-"],
+    ["수령", pickupLabel(payload.pickup)],
+  ]
+    .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
+    .join("");
+}
+
+async function notifyOrder(payload) {
+  const response = await fetch("api/order-alert", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ order: payload }),
+  });
+
+  return response.json().catch(() => ({}));
 }
 
 function setInitialSummary() {
@@ -82,7 +136,7 @@ function setInitialSummary() {
   orderFileName.textContent = file;
   orderEstimateMeta.textContent = `${param("material")} · ${param("quantity", "1")}개 · 최대 ${param("maxSize", "-")}mm`;
   orderEstimate.textContent = estimate;
-  orderSummaryText.textContent = `${file} 조건으로 선결제 주문을 이어갑니다. 실제 출력 가능 여부는 접수 후 최종 확인됩니다.`;
+  orderSummaryText.textContent = `${file} 조건으로 주문을 이어갑니다. 실제 출력 가능 여부는 접수 후 최종 확인됩니다.`;
 
   orderBreakdown.innerHTML = [
     ["소재", param("material")],
@@ -92,7 +146,7 @@ function setInitialSummary() {
     ["서포트", param("support")],
     ["다색 출력", param("multicolor")],
     ["수령", "택배 또는 현장 수령"],
-    ["결제", "선결제 필요"],
+    ["결제", "카카오뱅크 계좌이체"],
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
     .join("");
@@ -118,49 +172,42 @@ orderModelFile.addEventListener("change", () => {
   updateSimulation(file);
 });
 
-orderForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const clientKey = paymentConfig.clientKey || "";
-
-  if (!window.TossPayments) {
-    paymentNotice.textContent = "결제 SDK를 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해주세요.";
-    return;
+copyAccountButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(bankTransfer.accountNumber);
+    copyAccountButton.textContent = "복사 완료";
+    window.setTimeout(() => {
+      copyAccountButton.textContent = "계좌 복사";
+    }, 1600);
+  } catch {
+    paymentNotice.textContent = `계좌번호: ${bankTransfer.accountNumber}`;
   }
+});
 
-  if (!clientKey || clientKey.includes("REPLACE_ME")) {
-    paymentNotice.textContent = "토스페이먼츠 clientKey가 필요합니다. payment-config.js에 테스트 키를 넣으면 결제창 테스트가 가능합니다.";
+orderForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const amount = parseEstimateAmount();
+  if (amount <= 0) {
+    paymentNotice.textContent = "견적 금액이 0원입니다. 메인 견적기에서 파일과 조건을 먼저 확인해주세요.";
     return;
   }
 
   const orderId = createOrderId();
   const payload = buildOrderPayload(orderId);
   savePendingOrder(payload);
+  renderBankTransfer(payload);
 
-  paymentNotice.textContent = "결제창을 여는 중입니다.";
+  paymentNotice.textContent = `${payload.orderId} 주문번호가 생성되었습니다. ${bankTransfer.bankName} ${bankTransfer.accountNumber}로 ${formatter.format(payload.amount)}원을 입금해주세요.`;
 
-  const tossPayments = TossPayments(clientKey);
-  const payment = tossPayments.payment({ customerKey: TossPayments.ANONYMOUS || "ANONYMOUS" });
-
-  payment.requestPayment({
-    method: payload.paymentMethod,
-    amount: {
-      value: payload.amount,
-      currency: "KRW",
-    },
-    orderId: payload.orderId,
-    orderName: payload.orderName,
-    successUrl: getReturnUrl("payment-success.html"),
-    failUrl: getReturnUrl("payment-fail.html"),
-    customerName: payload.customerName,
-    customerMobilePhone: payload.customerMobilePhone,
-    metadata: {
-      fileName: payload.fileName,
-      pickup: payload.pickup,
-      paymentMethod: payload.paymentMethod,
-    },
-  }).catch((error) => {
-    paymentNotice.textContent = error.message || "결제창을 열지 못했습니다. 잠시 후 다시 시도해주세요.";
-  });
+  try {
+    const result = await notifyOrder(payload);
+    if (result.notification === "telegram-sent") {
+      paymentNotice.textContent += " 주문 알림도 전송되었습니다.";
+    }
+  } catch {
+    paymentNotice.textContent += " 주문 알림 전송은 나중에 다시 확인해주세요.";
+  }
 });
 
 setInitialSummary();

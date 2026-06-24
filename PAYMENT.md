@@ -1,28 +1,15 @@
 # Real3DMaker Payment Setup
 
-Real3DMaker uses Toss Payments Standard Payment Window for card and easy-pay checkout.
+Real3DMaker currently uses manual bank transfer instead of a card payment gateway.
 
 ## What Is Already Wired
 
-- `order.html` loads the Toss Payments V2 SDK.
-- `order.js` opens the Toss payment window with `method: "CARD"` before generating a pickup QR.
-- `payment-success.html` receives `paymentKey`, `orderId`, and `amount` after payment.
-- `payment-success.js` compares the returned amount with the pending order amount and calls the confirm endpoint.
-- `netlify/functions/confirm-payment.js` is the Netlify Functions endpoint that calls Toss Payments confirm API.
-- When Telegram environment variables are set, the confirm endpoint sends a new-order message after payment approval.
-- `netlify.toml` rewrites `/api/confirm-payment` to the Netlify function.
-
-## Required Before Real Payments
-
-1. Create a Toss Payments merchant account.
-2. Replace `payment-config.js` with your client key.
-3. Add `TOSS_SECRET_KEY` to the Netlify site environment variables.
-4. Store each order on the server before payment and compare the stored amount before calling confirm.
-5. Deploy to a host that can run the confirm endpoint. GitHub Pages alone cannot call Toss confirm because the secret key must stay on the server.
-6. Replace the placeholder business address in `policies.html` with the business registration address before Toss/card review.
-7. Switch from test keys to live keys only after Toss Payments and card-company review is complete.
-
-Do not put `TOSS_SECRET_KEY` in any browser JavaScript file.
+- `order.html` shows KakaoBank transfer instructions after an order number is created.
+- `order.js` creates the order number, stores the pending order in session storage, renders the QR image, and calls the order alert endpoint.
+- The transfer account is `KakaoBank 3333-35-6070100`.
+- The QR code contains the order number, account, amount, and depositor name for easy scanning.
+- `netlify/functions/order-alert.js` sends a Telegram new-order message when Telegram environment variables are set.
+- `netlify.toml` rewrites `/api/order-alert` to the Netlify function.
 
 ## Telegram Order Alerts
 
@@ -33,4 +20,10 @@ TELEGRAM_BOT_TOKEN="123456789:your-bot-token"
 TELEGRAM_CHAT_ID="your-chat-id"
 ```
 
-The alert is sent only after Toss payment approval succeeds. If the Telegram variables are missing or Telegram fails, the payment success page still works and the response marks the notification as skipped or failed.
+The alert is sent when the customer creates an order number. If the Telegram variables are missing or Telegram fails, the order page still shows the bank transfer instructions.
+
+## Notes
+
+- Bank transfer confirmation is manual for now.
+- The customer should include the order number or matching depositor name when sending money.
+- Keep `TELEGRAM_BOT_TOKEN` server-side only. Do not put it in browser JavaScript.
