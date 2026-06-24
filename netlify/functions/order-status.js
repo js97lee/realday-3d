@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 
 const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
 
@@ -84,6 +84,7 @@ exports.handler = async (event) => {
   }
 
   try {
+    connectLambda(event);
     const store = getStore("real3dmaker-orders");
     const order = await store.get(orderId, { type: "json" });
 

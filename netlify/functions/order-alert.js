@@ -1,4 +1,4 @@
-const { getStore } = require("@netlify/blobs");
+const { connectLambda, getStore } = require("@netlify/blobs");
 
 const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
 
@@ -106,7 +106,8 @@ function stripPrivateFields(order) {
   return storedOrder;
 }
 
-async function saveOrder(order) {
+async function saveOrder(order, event) {
+  connectLambda(event);
   const store = getStore("real3dmaker-orders");
   const now = new Date().toISOString();
   const storedOrder = {
@@ -156,7 +157,7 @@ exports.handler = async (event) => {
     let stored = false;
     let status = order.status || "입금 대기";
     try {
-      const savedOrder = await saveOrder(order);
+      const savedOrder = await saveOrder(order, event);
       stored = true;
       status = savedOrder.status;
     } catch {
