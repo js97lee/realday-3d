@@ -8,15 +8,17 @@
       content="Real3DMaker 결제 승인 및 수령 안내 확인 페이지입니다."
     />
     <title>Real3DMaker | 결제 완료</title>
+    <link rel="canonical" href="https://real3dmaker.com/payment-success.html" />
+    <meta name="robots" content="noindex, follow" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://js97lee.github.io/realday-3d/payment-success.html" />
-    <meta property="og:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Quote" />
+    <meta property="og:url" content="https://real3dmaker.com/payment-success.html" />
+    <meta property="og:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Studio" />
     <meta property="og:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta property="og:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Quote" />
+    <meta name="twitter:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Studio" />
     <meta name="twitter:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta name="twitter:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,7 +48,7 @@
           <p class="eyebrow">Payment Result</p>
           <h1>결제 승인 확인 중.</h1>
           <p id="paymentStatusText">
-            토스페이먼츠 결제 결과를 확인하고 있습니다. 승인 완료 후 수령 안내가 표시됩니다.
+            주문번호와 입금 정보를 확인하고 있습니다. 접수 후 수령 안내가 표시됩니다.
           </p>
         </div>
       </section>
@@ -57,18 +59,18 @@
             <div class="order-step">
               <span>1</span>
               <div>
-                <h2>결제 정보</h2>
-                <p>결제 금액, 주문번호, 승인 응답의 결제수단을 확인합니다.</p>
+                <h2>주문 정보</h2>
+                <p>입금 금액, 주문번호, 수령 방식을 확인합니다.</p>
               </div>
             </div>
             <div class="result-breakdown" id="paymentBreakdown"></div>
-            <p class="payment-notice" id="confirmMessage">승인 API를 호출하는 중입니다.</p>
+            <p class="payment-notice" id="confirmMessage">주문 정보를 확인하는 중입니다.</p>
           </article>
 
           <aside class="quote-result order-summary">
             <span class="result-label">수령 안내</span>
             <strong id="successOrderEstimate">승인 대기</strong>
-            <p id="successSummaryText">결제 승인이 확인되면 수령 방법을 안내합니다.</p>
+            <p id="successSummaryText">입금 확인 후 수령 방법을 안내합니다.</p>
 
             <div class="pickup-card">
               <div class="order-number-box">

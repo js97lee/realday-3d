@@ -1,8 +1,6 @@
 const materialRates = {
   pla: { label: "PLA", gram: 95, hourly: 2600, multiplier: 1 },
   petg: { label: "PETG", gram: 125, hourly: 2900, multiplier: 1.08 },
-  abs: { label: "ABS/ASA", gram: 150, hourly: 3300, multiplier: 1.18 },
-  tpu: { label: "TPU", gram: 180, hourly: 3600, multiplier: 1.32 },
 };
 
 const layerMultipliers = {
@@ -334,22 +332,66 @@ function makeBuildPlate(THREE) {
   return plate;
 }
 
-function fitObjectToView(THREE, object, camera, controls) {
+function getObjectBounds(THREE, object) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  object.position.sub(center);
-  object.position.z += size.z / 2;
+  if (!Number.isFinite(size.x + size.y + size.z) || Math.max(size.x, size.y, size.z) <= 0) {
+    return null;
+  }
+  return { box, size };
+}
 
-  const distance = 360;
-  camera.position.set(distance * 0.72, -distance * 0.9, distance * 0.62);
-  camera.near = 1;
-  camera.far = 2000;
+function normalizeObjectForPlate(THREE, object) {
+  const group = new THREE.Group();
+  group.add(object);
+
+  let bounds = getObjectBounds(THREE, group);
+  if (!bounds) return { object: group, displayScale: 1, size: new THREE.Vector3(0, 0, 0) };
+
+  let center = bounds.box.getCenter(new THREE.Vector3());
+  group.position.x -= center.x;
+  group.position.y -= center.y;
+  group.position.z -= bounds.box.min.z;
+  group.updateMatrixWorld(true);
+
+  bounds = getObjectBounds(THREE, group);
+  const maxDimension = Math.max(bounds.size.x, bounds.size.y, bounds.size.z);
+  let displayScale = 1;
+  if (maxDimension > 220) {
+    displayScale = 220 / maxDimension;
+  } else if (maxDimension > 0 && maxDimension < 28) {
+    displayScale = 48 / maxDimension;
+  }
+
+  group.scale.setScalar(displayScale);
+  group.updateMatrixWorld(true);
+
+  bounds = getObjectBounds(THREE, group);
+  center = bounds.box.getCenter(new THREE.Vector3());
+  group.position.x -= center.x;
+  group.position.y -= center.y;
+  group.position.z -= bounds.box.min.z;
+  group.updateMatrixWorld(true);
+
+  bounds = getObjectBounds(THREE, group);
+  return { object: group, displayScale, size: bounds.size };
+}
+
+function fitObjectToView(THREE, object, camera, controls) {
+  const bounds = getObjectBounds(THREE, object);
+  const size = bounds?.size || new THREE.Vector3(120, 120, 60);
+  const center = bounds?.box.getCenter(new THREE.Vector3()) || new THREE.Vector3(0, 0, 0);
+  const maxDimension = Math.max(size.x, size.y, size.z, 120);
+  const distance = Math.max(220, maxDimension * 1.85);
+
+  camera.position.set(distance * 0.72, -distance * 0.92, distance * 0.64);
+  camera.near = Math.max(0.1, distance / 1000);
+  camera.far = Math.max(2000, distance * 8);
   camera.updateProjectionMatrix();
 
-  controls.target.set(0, 0, Math.max(8, Math.min(36, size.z * 0.45)));
-  controls.minDistance = 90;
-  controls.maxDistance = 620;
+  controls.target.set(center.x, center.y, Math.max(4, Math.min(60, size.z * 0.45)));
+  controls.minDistance = Math.max(30, distance * 0.22);
+  controls.maxDistance = Math.max(620, distance * 3.2);
   controls.update();
 }
 
@@ -361,8 +403,12 @@ function preparePreviewObject(THREE, object) {
           color: 0xf8fafc,
           roughness: 0.62,
           metalness: 0.02,
+          side: THREE.DoubleSide,
         });
       }
+      child.geometry?.computeBoundingBox?.();
+      child.geometry?.computeBoundingSphere?.();
+      child.geometry?.computeVertexNormals?.();
       child.castShadow = true;
       child.receiveShadow = true;
     }
@@ -537,10 +583,16 @@ function applyPreviewMode() {
   if (!modelViewer) return;
   modelViewer.object.traverse((child) => {
     if (child.isMesh) {
-      child.material.color.set(previewMode === "source" ? 0xf8fafc : 0xdbeafe);
-      child.material.wireframe = false;
-      child.material.opacity = 1;
-      child.material.transparent = false;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((material) => {
+        if (!material) return;
+        material.color?.set(previewMode === "source" ? 0xf8fafc : 0xdbeafe);
+        material.wireframe = false;
+        material.opacity = 1;
+        material.transparent = false;
+        material.side = modelViewer.THREE?.DoubleSide ?? material.side;
+        material.needsUpdate = true;
+      });
     }
   });
   if (modelViewer.supportGroup) {
@@ -556,10 +608,18 @@ async function loadPreviewObject(file, extension, THREE) {
   if (extension === "stl") {
     const { STLLoader } = await import("three/addons/loaders/STLLoader.js");
     const geometry = new STLLoader().parse(await file.arrayBuffer());
+    geometry.deleteAttribute?.("normal");
     geometry.computeVertexNormals();
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
     return new THREE.Mesh(
       geometry,
-      new THREE.MeshStandardMaterial({ color: 0x77b7ff, roughness: 0.46, metalness: 0.08 })
+      new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.58,
+        metalness: 0.02,
+        side: THREE.DoubleSide,
+      })
     );
   }
 
@@ -643,7 +703,8 @@ async function renderModelPreview(file) {
       fallback = true;
     }
 
-    object = preparePreviewObject(THREE, object);
+    const normalized = normalizeObjectForPlate(THREE, preparePreviewObject(THREE, object));
+    object = normalized.object;
     scene.add(object);
     fitObjectToView(THREE, object, camera, controls);
     const supportGroup = makeSupportPreview(THREE, object);
@@ -665,7 +726,7 @@ async function renderModelPreview(file) {
       modelViewer.frame = requestAnimationFrame(animate);
     };
 
-    modelViewer = { scene, renderer, controls, resize, frame: 0, object, supportGroup };
+    modelViewer = { THREE, scene, renderer, controls, resize, frame: 0, object, supportGroup };
     applyPreviewMode();
     window.addEventListener("resize", resize);
     animate();
@@ -676,6 +737,8 @@ async function renderModelPreview(file) {
         : "미리보기 준비 완료",
       fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
         ? "정확한 형상은 주문 접수 후 확인합니다."
+        : normalized.displayScale !== 1
+        ? `미리보기 배율 ${normalized.displayScale.toFixed(2)}x · 드래그 회전 · 휠 확대/축소`
         : "드래그 회전 · 휠 확대/축소",
       "is-ready"
     );
@@ -732,7 +795,7 @@ async function renderSamplePreview() {
     addStudioLights(THREE, scene);
     scene.add(makeBuildPlate(THREE));
 
-    const object = preparePreviewObject(THREE, makeSamplePreviewObject(THREE));
+    const { object } = normalizeObjectForPlate(THREE, preparePreviewObject(THREE, makeSamplePreviewObject(THREE)));
     scene.add(object);
     fitObjectToView(THREE, object, camera, controls);
     modelPlaceholder.hidden = true;
@@ -751,7 +814,7 @@ async function renderSamplePreview() {
       modelViewer.frame = requestAnimationFrame(animate);
     };
 
-    modelViewer = { scene, renderer, controls, resize, frame: 0, object, supportGroup: null };
+    modelViewer = { THREE, scene, renderer, controls, resize, frame: 0, object, supportGroup: null };
     window.addEventListener("resize", resize);
     animate();
   } catch (error) {

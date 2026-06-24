@@ -23,7 +23,10 @@ function getStoredOrder() {
 }
 
 function renderBreakdown(order) {
-  const method = confirmedPayment?.method || (order?.paymentMethod === "CARD" ? "카드/간편결제" : order?.paymentMethod) || "-";
+  const method =
+    order?.paymentMethod === "BANK_TRANSFER"
+      ? "카카오뱅크 계좌이체"
+      : confirmedPayment?.method || order?.paymentMethod || "-";
   const provider =
     confirmedPayment?.easyPay?.provider ||
     confirmedPayment?.card?.company ||
@@ -47,9 +50,9 @@ function renderBreakdown(order) {
 
 function markConfirmed(order) {
   renderBreakdown(order);
-  confirmMessage.textContent = "결제가 승인되었습니다. 주문이 출력 대기열에 접수되었습니다.";
-  paymentStatusText.textContent = "결제 승인 완료. 출력 완료 후 수령 방법을 안내드립니다.";
-  successOrderEstimate.textContent = Number.isFinite(amount) ? `${formatter.format(amount)}원 결제 완료` : "결제 완료";
+  confirmMessage.textContent = "주문이 출력 대기열에 접수되었습니다.";
+  paymentStatusText.textContent = "주문 접수 완료. 출력 완료 후 수령 방법을 안내드립니다.";
+  successOrderEstimate.textContent = Number.isFinite(amount) ? `${formatter.format(amount)} 입금 확인 필요` : "입금 확인 필요";
   successSummaryText.textContent =
     order?.pickup === "ONSITE"
       ? "출력 완료 후 현장 수령 가능 시간을 연락처로 안내합니다."
@@ -59,9 +62,9 @@ function markConfirmed(order) {
 
 function markPending(reason) {
   confirmMessage.textContent = reason;
-  paymentStatusText.textContent = "결제 요청은 완료되었지만 서버 승인 확인이 아직 필요합니다.";
-  successOrderEstimate.textContent = "승인 확인 필요";
-  successSummaryText.textContent = "운영 서버의 confirm API가 연결되면 이 단계에서 QR이 발급됩니다.";
+  paymentStatusText.textContent = "주문 정보 확인이 필요합니다.";
+  successOrderEstimate.textContent = "확인 필요";
+  successSummaryText.textContent = "주문번호와 입금 내역을 확인한 뒤 제작 가능 여부를 안내합니다.";
 }
 
 async function confirmPayment(order) {
@@ -101,7 +104,7 @@ async function confirmPayment(order) {
     }));
     markConfirmed(order);
   } catch {
-    markPending("현재 배포에서 서버 승인 API를 호출할 수 없습니다. Netlify Functions 배포와 TOSS_SECRET_KEY 설정이 필요합니다.");
+    markPending("주문 정보를 확인할 수 없습니다. 주문번호와 입금 내역을 고객센터로 알려주세요.");
   }
 }
 

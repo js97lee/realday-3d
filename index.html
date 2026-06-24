@@ -8,17 +8,66 @@
       content="Real3DMaker는 3D 파일 업로드, 출력 시뮬레이션 확인, 계좌이체 주문, 택배 또는 현장 수령까지 이어지는 3D 프린팅 주문 서비스입니다."
     />
     <title>Real3DMaker | 3D 프린팅 주문</title>
+    <link rel="canonical" href="https://real3dmaker.com/" />
+    <meta name="robots" content="index, follow" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://js97lee.github.io/realday-3d/" />
-    <meta property="og:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Quote" />
+    <meta property="og:url" content="https://real3dmaker.com/" />
+    <meta property="og:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Studio" />
     <meta property="og:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta property="og:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Quote" />
+    <meta name="twitter:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Studio" />
     <meta name="twitter:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta name="twitter:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://real3dmaker.com/#business",
+            "name": "Real3DMaker",
+            "alternateName": "리얼데이",
+            "url": "https://real3dmaker.com/",
+            "image": "https://real3dmaker.com/assets/og-real3dmaker.png",
+            "email": "studio.realday@gmail.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "아차산로 27길 29",
+              "addressLocality": "광진구",
+              "addressRegion": "서울시",
+              "addressCountry": "KR"
+            },
+            "areaServed": "KR",
+            "priceRange": "₩₩",
+            "description": "PLA와 PETG 소재 기반 FDM 3D 프린팅 주문 제작 서비스입니다."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://real3dmaker.com/#website",
+            "name": "Real3DMaker",
+            "url": "https://real3dmaker.com/",
+            "inLanguage": "ko-KR"
+          },
+          {
+            "@type": "Service",
+            "@id": "https://real3dmaker.com/#service",
+            "name": "FDM 3D 프린팅 주문 제작",
+            "provider": { "@id": "https://real3dmaker.com/#business" },
+            "serviceType": "3D Printing",
+            "areaServed": "KR",
+            "description": "3D 파일 업로드, 모델 미리보기, 예상 견적 계산, 계좌이체 주문, 택배 또는 현장 수령 안내를 제공합니다.",
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "priceCurrency": "KRW"
+            }
+          }
+        ]
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -189,8 +238,6 @@
               <select id="material">
                 <option value="pla">PLA - 기본 시제품</option>
                 <option value="petg">PETG - 내구/생활 파츠</option>
-                <option value="abs">ABS/ASA - 내열성</option>
-                <option value="tpu">TPU - 유연 소재</option>
               </select>
             </label>
 
@@ -349,7 +396,7 @@
     <footer>
       <div>
         <strong>리얼데이</strong>
-        <span>3D Printing Quote Studio</span>
+        <span>3D Printing Studio</span>
       </div>
       <div class="footer-info">
         <span>상호: 리얼데이</span>

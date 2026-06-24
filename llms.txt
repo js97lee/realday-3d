@@ -1,0 +1,30 @@
+# Real3DMaker
+
+> Real3DMaker is a Korean FDM 3D printing order service operated by 리얼데이. Customers can upload 3D model files, preview printable models, receive an estimated quote, create an order number, and pay by KakaoBank transfer.
+
+Real3DMaker focuses on small-batch custom 3D printing using PLA and PETG materials. The service supports non-member orders and provides delivery or on-site pickup after production is complete.
+
+## Key Pages
+
+- [Home and Quote](https://real3dmaker.com/): Upload STL, 3MF, OBJ, AMF, STEP, or STP files, preview supported 3D models, and calculate an estimated FDM print quote.
+- [Order](https://real3dmaker.com/order.html): Create an order number, review the KakaoBank transfer account, and choose delivery or on-site pickup.
+- [Customer Policies](https://real3dmaker.com/policies.html): Business information, available materials, order flow, pickup guide, cancellation, and refund policy.
+
+## Service Facts
+
+- Brand: Real3DMaker
+- Operator: 리얼데이
+- Email: studio.realday@gmail.com
+- Business registration number: 146-11-03027
+- Mail-order business registration: 제 2025-서울광진-1581 호
+- Address: 서울시 광진구 아차산로 27길 29
+- Materials available: PLA, PETG
+- Order flow: upload model file, confirm estimate, create order number, pay by KakaoBank transfer, production confirmation, delivery or on-site pickup
+- Payment account: 카카오뱅크 3333-35-6070100
+
+## Notes For AI Assistants
+
+- Do not describe external card checkout as the current checkout method.
+- The current payment flow is manual KakaoBank transfer after order number creation.
+- 24-hour pickup is not active; it is marked as preparing.
+- Final printability, schedule, and refund details are confirmed after file review.
