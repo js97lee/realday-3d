@@ -37,6 +37,8 @@ function buildTelegramMessage(order) {
     `서포트: ${trim(order?.support)}`,
     `다색출력: ${trim(order?.multicolor)}`,
     `후가공: ${trim(order?.finish)}`,
+    `파일저장: ${trim(order?.driveFileUrl, order?.modelFileStatus || "미연결")}`,
+    `시트기록: ${trim(order?.sheetStatus || "미연결")}`,
     `조회: ${statusUrl}`,
   ];
 
@@ -102,7 +104,7 @@ function normalizePhone(value) {
 }
 
 function stripPrivateFields(order) {
-  const { previewImageDataUrl, ...storedOrder } = order;
+  const { previewImageDataUrl, modelFileDataUrl, ...storedOrder } = order;
   return storedOrder;
 }
 
@@ -122,6 +124,29 @@ async function saveOrder(order, event) {
   };
   await store.setJSON(order.orderId, storedOrder);
   return storedOrder;
+}
+
+async function syncGoogleWorkspace(order) {
+  const webhookUrl = process.env.GOOGLE_ORDERS_WEBHOOK_URL;
+  const webhookSecret = process.env.GOOGLE_ORDERS_WEBHOOK_SECRET;
+
+  if (!webhookUrl) {
+    return { ok: false, skipped: true, reason: "google-webhook-missing" };
+  }
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      secret: webhookSecret || "",
+      order,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  return { ok: response.ok && data.ok !== false, status: response.status, data };
 }
 
 exports.handler = async (event) => {
@@ -157,6 +182,15 @@ exports.handler = async (event) => {
     let stored = false;
     let status = order.status || "입금 대기";
     try {
+      const googleSync = await syncGoogleWorkspace(order);
+      if (googleSync.ok) {
+        order.sheetStatus = "google-sheets-recorded";
+        order.driveFileUrl = googleSync.data.fileUrl || "";
+        order.sheetUrl = googleSync.data.sheetUrl || "";
+      } else {
+        order.sheetStatus = googleSync.skipped ? "google-webhook-not-configured" : "google-sheets-failed";
+      }
+
       const savedOrder = await saveOrder(order, event);
       stored = true;
       status = savedOrder.status;

@@ -22,6 +22,8 @@ const bankTransfer = {
   accountNumber: "3333-35-6070100",
 };
 
+const maxInlineModelFileBytes = 5 * 1024 * 1024;
+
 function param(name, fallback = "-") {
   return params.get(name) || fallback;
 }
@@ -84,6 +86,44 @@ function buildOrderPayload(orderId) {
     bankAccountNumber: bankTransfer.accountNumber,
     memo: document.querySelector("#paymentMemo").value.trim(),
     previewImageDataUrl: sessionStorage.getItem("real3dmaker-preview-image") || "",
+  };
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result));
+    reader.addEventListener("error", () => reject(reader.error));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function attachModelFilePayload(payload) {
+  const [selectedFile] = orderModelFile.files;
+  if (!selectedFile) {
+    return {
+      ...payload,
+      modelFileStatus: "not-attached",
+    };
+  }
+
+  if (selectedFile.size > maxInlineModelFileBytes) {
+    return {
+      ...payload,
+      modelFileStatus: "too-large-for-inline-upload",
+      modelFileName: selectedFile.name,
+      modelFileSize: selectedFile.size,
+      modelFileMimeType: selectedFile.type || "application/octet-stream",
+    };
+  }
+
+  return {
+    ...payload,
+    modelFileStatus: "attached",
+    modelFileName: selectedFile.name,
+    modelFileSize: selectedFile.size,
+    modelFileMimeType: selectedFile.type || "application/octet-stream",
+    modelFileDataUrl: await readFileAsDataUrl(selectedFile),
   };
 }
 
@@ -209,7 +249,8 @@ orderForm.addEventListener("submit", async (event) => {
   }
 
   const orderId = createOrderId();
-  const payload = buildOrderPayload(orderId);
+  let payload = buildOrderPayload(orderId);
+  payload = await attachModelFilePayload(payload);
   savePendingOrder(payload);
   renderBankTransfer(payload);
 
