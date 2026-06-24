@@ -1,5 +1,63 @@
+const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
+
+function formatCurrency(value) {
+  return `${Number(value || 0).toLocaleString("ko-KR")}원`;
+}
+
+function pickupLabel(value) {
+  return value === "ONSITE" ? "현장 수령" : "택배 수령";
+}
+
+function trim(value, fallback = "-") {
+  const text = String(value || "").trim();
+  return text || fallback;
+}
+
+function buildTelegramMessage({ orderId, amount, order, payment }) {
+  const lines = [
+    "Real3DMaker 새 주문",
+    "",
+    `주문번호: ${orderId}`,
+    `결제금액: ${formatCurrency(amount)}`,
+    `결제수단: ${trim(payment?.method)}`,
+    `주문자: ${trim(order?.customerName)}`,
+    `연락처: ${trim(order?.customerMobilePhone)}`,
+    `수령: ${pickupLabel(order?.pickup)}`,
+    `파일: ${trim(order?.fileName)}`,
+    `소재: ${trim(order?.material)}`,
+    `수량: ${trim(order?.quantity, "1")}개`,
+  ];
+
+  if (order?.memo) {
+    lines.push(`메모: ${trim(order.memo)}`);
+  }
+
+  return lines.join("\n");
+}
+
+async function notifyTelegram(message) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    return { ok: false, skipped: true, reason: "telegram-env-missing" };
+  }
+
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      disable_web_page_preview: true,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  return { ok: response.ok, status: response.status, data };
+}
+
 exports.handler = async (event) => {
-  const jsonHeaders = { "Content-Type": "application/json; charset=utf-8" };
 
   if (event.httpMethod !== "POST") {
     return {
@@ -31,7 +89,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const { paymentKey, orderId, amount } = payload;
+  const { paymentKey, orderId, amount, order } = payload;
   if (!paymentKey || !orderId || typeof amount !== "number") {
     return {
       statusCode: 400,
@@ -55,6 +113,19 @@ exports.handler = async (event) => {
     const data = await tossResponse.json().catch(() => ({
       message: "토스페이먼츠 승인 응답을 읽을 수 없습니다.",
     }));
+
+    if (tossResponse.ok) {
+      try {
+        const notification = await notifyTelegram(buildTelegramMessage({ orderId, amount, order, payment: data }));
+        data.real3dmakerNotification = notification.ok
+          ? "telegram-sent"
+          : notification.skipped
+          ? "telegram-not-configured"
+          : "telegram-failed";
+      } catch {
+        data.real3dmakerNotification = "telegram-failed";
+      }
+    }
 
     return {
       statusCode: tossResponse.status,

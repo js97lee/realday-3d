@@ -9,6 +9,7 @@ Real3DMaker uses Toss Payments Standard Payment Window for card and easy-pay che
 - `payment-success.html` receives `paymentKey`, `orderId`, and `amount` after payment.
 - `payment-success.js` compares the returned amount with the pending order amount and calls the confirm endpoint.
 - `netlify/functions/confirm-payment.js` is the Netlify Functions endpoint that calls Toss Payments confirm API.
+- When Telegram environment variables are set, the confirm endpoint sends a new-order message after payment approval.
 - `netlify.toml` rewrites `/api/confirm-payment` to the Netlify function.
 
 ## Required Before Real Payments
@@ -22,3 +23,14 @@ Real3DMaker uses Toss Payments Standard Payment Window for card and easy-pay che
 7. Switch from test keys to live keys only after Toss Payments and card-company review is complete.
 
 Do not put `TOSS_SECRET_KEY` in any browser JavaScript file.
+
+## Telegram Order Alerts
+
+Create a Telegram bot with BotFather, then set these Netlify environment variables:
+
+```bash
+TELEGRAM_BOT_TOKEN="123456789:your-bot-token"
+TELEGRAM_CHAT_ID="your-chat-id"
+```
+
+The alert is sent only after Toss payment approval succeeds. If the Telegram variables are missing or Telegram fails, the payment success page still works and the response marks the notification as skipped or failed.

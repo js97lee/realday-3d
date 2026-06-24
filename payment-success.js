@@ -81,7 +81,7 @@ async function confirmPayment(order) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ paymentKey, orderId, amount }),
+      body: JSON.stringify({ paymentKey, orderId, amount, order }),
     });
 
     const data = await response.json().catch(() => ({}));
