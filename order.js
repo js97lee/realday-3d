@@ -9,7 +9,6 @@ const orderBreakdown = document.querySelector("#orderBreakdown");
 const orderModelFile = document.querySelector("#orderModelFile");
 const simulationPanel = document.querySelector("#simulationPanel");
 const orderForm = document.querySelector("#orderForm");
-const qrCode = document.querySelector("#qrCode");
 const pickupCode = document.querySelector("#pickupCode");
 const paymentNotice = document.querySelector("#paymentNotice");
 
@@ -109,65 +108,6 @@ function updateSimulation(file, fromQuote = false) {
   simulationPanel.querySelector("span").textContent = fromQuote
     ? `${file.name} · 견적 조건 기반 자동 확인`
     : `${formatFile(file)} · 업로드 파일 기반 자동 확인`;
-}
-
-function fallbackQr(text) {
-  qrCode.innerHTML = "";
-  const canvas = document.createElement("canvas");
-  canvas.width = 180;
-  canvas.height = 180;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#05070d";
-
-  let seed = 0;
-  for (let i = 0; i < text.length; i += 1) seed = (seed * 31 + text.charCodeAt(i)) % 9973;
-
-  const cell = 10;
-  for (let y = 1; y < 17; y += 1) {
-    for (let x = 1; x < 17; x += 1) {
-      const active = (x * 17 + y * 31 + seed) % 5 < 2;
-      if (active) ctx.fillRect(x * cell, y * cell, cell, cell);
-    }
-  }
-
-  [
-    [1, 1],
-    [12, 1],
-    [1, 12],
-  ].forEach(([x, y]) => {
-    ctx.fillRect(x * cell, y * cell, cell * 5, cell * 5);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect((x + 1) * cell, (y + 1) * cell, cell * 3, cell * 3);
-    ctx.fillStyle = "#05070d";
-    ctx.fillRect((x + 2) * cell, (y + 2) * cell, cell, cell);
-  });
-
-  qrCode.append(canvas);
-}
-
-function renderQr(orderId) {
-  const payload = JSON.stringify({
-    service: "Real3DMaker",
-    orderId,
-    pickup: document.querySelector("#pickupMethod").value,
-    estimate: param("estimate", ""),
-  });
-
-  qrCode.innerHTML = "";
-  if (window.QRCode) {
-    new QRCode(qrCode, {
-      text: payload,
-      width: 180,
-      height: 180,
-      colorDark: "#05070d",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  } else {
-    fallbackQr(payload);
-  }
 }
 
 orderModelFile.addEventListener("change", () => {

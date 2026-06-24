@@ -10,7 +10,6 @@ const confirmMessage = document.querySelector("#confirmMessage");
 const paymentStatusText = document.querySelector("#paymentStatusText");
 const successOrderEstimate = document.querySelector("#successOrderEstimate");
 const successSummaryText = document.querySelector("#successSummaryText");
-const qrCode = document.querySelector("#qrCode");
 const pickupCode = document.querySelector("#pickupCode");
 let confirmedPayment = null;
 
@@ -20,52 +19,6 @@ function getStoredOrder() {
     return JSON.parse(sessionStorage.getItem(`real3dmaker-order-${orderId}`));
   } catch {
     return null;
-  }
-}
-
-function fallbackQr(text) {
-  qrCode.innerHTML = "";
-  const canvas = document.createElement("canvas");
-  canvas.width = 180;
-  canvas.height = 180;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#05070d";
-
-  let seed = 0;
-  for (let i = 0; i < text.length; i += 1) seed = (seed * 31 + text.charCodeAt(i)) % 9973;
-
-  const cell = 10;
-  for (let y = 1; y < 17; y += 1) {
-    for (let x = 1; x < 17; x += 1) {
-      if ((x * 17 + y * 31 + seed) % 5 < 2) ctx.fillRect(x * cell, y * cell, cell, cell);
-    }
-  }
-
-  qrCode.append(canvas);
-}
-
-function renderQr(order) {
-  const payload = JSON.stringify({
-    service: "Real3DMaker",
-    orderId,
-    paymentKey,
-    pickup: order?.pickup || "DELIVERY",
-  });
-
-  qrCode.innerHTML = "";
-  if (window.QRCode) {
-    new QRCode(qrCode, {
-      text: payload,
-      width: 180,
-      height: 180,
-      colorDark: "#05070d",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  } else {
-    fallbackQr(payload);
   }
 }
 
@@ -102,7 +55,6 @@ function markConfirmed(order) {
       ? "출력 완료 후 현장 수령 가능 시간을 연락처로 안내합니다."
       : "출력 완료 후 택배 발송 정보를 연락처로 안내합니다.";
   pickupCode.textContent = orderId;
-  qrCode.innerHTML = "<span>24시간 방문 수령 QR은 준비중</span>";
 }
 
 function markPending(reason) {
