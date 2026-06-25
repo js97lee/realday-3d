@@ -15,6 +15,13 @@ function trim(value, fallback = "-") {
   return text || fallback;
 }
 
+function printableFileLabel(order) {
+  if (order?.driveFileUrl) return order.driveFileUrl;
+  if (order?.modelFileStatus === "attached") return "주문 파일 첨부됨";
+  if (order?.modelFileStatus === "too-large-for-inline-upload") return "파일이 커서 별도 확인 필요";
+  return "파일 미첨부";
+}
+
 function buildTelegramMessage(order) {
   const statusUrl = `https://real3dmaker.com/order-status.html?orderId=${encodeURIComponent(trim(order?.orderId, ""))}`;
   const lines = [
@@ -38,7 +45,7 @@ function buildTelegramMessage(order) {
     `서포트: ${trim(order?.support)}`,
     `다색출력: ${trim(order?.multicolor)}`,
     `후가공: ${trim(order?.finish)}`,
-    `파일저장: ${trim(order?.driveFileUrl, order?.modelFileStatus || "미연결")}`,
+    `📦 출력용 3D 파일: ${printableFileLabel(order)}`,
     `시트기록: ${trim(order?.sheetStatus || "미연결")}`,
     `조회: ${statusUrl}`,
   ];
