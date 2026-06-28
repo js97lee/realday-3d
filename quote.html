@@ -93,8 +93,6 @@
       <nav>
         <a href="index.html">홈</a>
         <a href="#quote">견적</a>
-        <a href="#simulator">시뮬레이션</a>
-        <a href="#process">주문 흐름</a>
         <a href="order.html">주문하기</a>
         <a href="order-status.html">주문 조회</a>
         <a href="policies.html">고객 안내</a>
@@ -102,68 +100,6 @@
     </header>
 
     <main id="top">
-      <section class="hero">
-        <img src="assets/hero-3d-print.png" alt="" class="hero-image" />
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-          <p class="eyebrow">3D Print Order System</p>
-          <h1>파일을 올리고, 확인하고, 입금하면 출력이 시작됩니다.</h1>
-          <p class="hero-copy">
-            Real3DMaker는 3D 파일 업로드부터 출력 시뮬레이션 확인, 주문 접수,
-            택배 또는 현장 수령 안내까지 한 흐름으로 처리합니다.
-          </p>
-          <div class="hero-actions">
-            <a href="#quote" class="button primary">
-              <span aria-hidden="true">↧</span>
-              견적 계산하기
-            </a>
-            <a href="order.html" class="button secondary">
-              <span aria-hidden="true">→</span>
-              주문 페이지로 이동
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section class="quick-stats" aria-label="서비스 특징">
-        <div>
-          <strong>3D 파일 업로드</strong>
-          <span>STL, 3MF, STEP, OBJ 파일 확인</span>
-        </div>
-        <div>
-          <strong>출력 시뮬레이션</strong>
-          <span>업로드 파일 기반 자동 미리보기</span>
-        </div>
-        <div>
-          <strong>택배/현장 수령</strong>
-          <span>출력 완료 후 수령 방식 안내</span>
-        </div>
-      </section>
-
-      <section class="section intro">
-        <div class="section-heading">
-          <p class="eyebrow">Why Real3DMaker</p>
-          <h2>파일부터 수령까지 끊기지 않는 주문 경험.</h2>
-        </div>
-        <div class="feature-grid">
-          <article>
-            <span class="feature-icon">⌁</span>
-            <h3>파일 먼저 확인</h3>
-            <p>파일명, 용량, 형식, STL 치수 정보를 읽어 견적 조건에 바로 반영합니다.</p>
-          </article>
-          <article>
-            <span class="feature-icon">▣</span>
-            <h3>자동 시뮬레이션</h3>
-            <p>업로드한 3D 파일을 바탕으로 모델 미리보기와 출력 조건을 자동 확인하고 주문 단계로 넘어갑니다.</p>
-          </article>
-          <article>
-            <span class="feature-icon">✓</span>
-            <h3>수령 안내</h3>
-            <p>출력 완료 후 택배 발송 또는 현장 수령 방식으로 안내합니다. 24시간 방문 수령은 준비중입니다.</p>
-          </article>
-        </div>
-      </section>
-
       <section class="section quote-section" id="quote">
         <div class="section-heading quote-heading">
           <p class="eyebrow">Instant Estimate</p>
@@ -322,75 +258,6 @@
               이 조건으로 주문하기
             </a>
           </aside>
-        </div>
-      </section>
-
-      <section class="section machines" id="simulator">
-        <div class="section-heading">
-          <p class="eyebrow">Print Preview</p>
-          <h2>출력 전 시뮬레이션 확인.</h2>
-        </div>
-        <div class="machine-table" role="table" aria-label="출력 시뮬레이션 기준">
-          <div role="row">
-            <span role="cell">3D 파일</span>
-            <strong role="cell">모델 형식, 용량, STL 기준 대략 치수 확인</strong>
-          </div>
-          <div role="row">
-            <span role="cell">시뮬레이션</span>
-            <strong role="cell">업로드된 3D 파일 기반 자동 미리보기와 조건 확인</strong>
-          </div>
-          <div role="row">
-            <span role="cell">주문 전 확인</span>
-            <strong role="cell">예상 금액과 수령 방식을 확인 후 계좌이체 주문 생성</strong>
-          </div>
-          <div role="row">
-            <span role="cell">수령</span>
-            <strong role="cell">택배 또는 현장 수령 안내</strong>
-          </div>
-        </div>
-      </section>
-
-      <section class="section process" id="process">
-        <div class="section-heading">
-          <p class="eyebrow">Process</p>
-          <h2>주문은 네 단계로 끝납니다.</h2>
-        </div>
-        <ol class="process-list">
-          <li><strong>파일 업로드</strong><span>출력할 3D 파일을 올리고 기본 정보를 확인합니다.</span></li>
-          <li><strong>자동 시뮬레이션</strong><span>업로드 파일로 모델 미리보기와 출력 조건을 자동 생성합니다.</span></li>
-          <li><strong>입금 확인 및 출력</strong><span>주문번호로 입금이 확인되면 출력 대기 상태로 접수됩니다.</span></li>
-          <li><strong>수령</strong><span>출력 완료 후 택배 또는 현장 수령으로 주문품을 받습니다.</span></li>
-        </ol>
-      </section>
-
-      <section class="section info-section" id="customer-info">
-        <div class="section-heading">
-          <p class="eyebrow">Customer Info</p>
-          <h2>주문 전 확인 정보.</h2>
-          <p>
-            Real3DMaker는 3D 프린팅 주문 제작 서비스입니다. 판매 상품, 입금, 수령,
-            취소/환불 기준과 사업자 정보를 고객 안내 페이지에서 확인할 수 있습니다.
-          </p>
-        </div>
-        <div class="info-grid">
-          <article>
-            <h3>판매 상품/서비스</h3>
-            <p>고객이 제공한 3D 파일을 기준으로 FDM 방식 출력물 제작, 기본 후가공, 택배 또는 현장 수령 안내를 제공합니다.</p>
-          </article>
-          <article>
-            <h3>비회원 주문</h3>
-            <p>회원가입 없이 이름, 연락처, 파일, 출력 조건만으로 견적 확인과 계좌이체 주문을 진행할 수 있습니다.</p>
-          </article>
-          <article>
-            <h3>취소/환불 안내</h3>
-            <p>출력 시작 전에는 취소가 가능하며, 주문 제작 특성상 출력 시작 후에는 단순 변심 환불이 제한될 수 있습니다.</p>
-          </article>
-        </div>
-        <div class="contact-actions">
-          <a href="policies.html" class="button secondary">
-            <span aria-hidden="true">→</span>
-            자세한 고객 안내
-          </a>
         </div>
       </section>
     </main>
