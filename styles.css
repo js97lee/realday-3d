@@ -303,6 +303,33 @@ article {
   align-items: start;
 }
 
+.quote-cta-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 30px;
+  background: var(--panel);
+  border: 1px solid rgba(142, 198, 255, 0.25);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.quote-cta-panel div {
+  display: grid;
+  gap: 8px;
+}
+
+.quote-cta-panel strong {
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1.15;
+}
+
+.quote-cta-panel span {
+  color: var(--muted);
+}
+
 .quote-form,
 .quote-result {
   padding: 28px;
@@ -1265,6 +1292,12 @@ footer strong {
   .quote-result,
   .order-summary {
     position: static;
+  }
+
+  .quote-cta-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 22px;
   }
 }
 

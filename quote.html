@@ -7,12 +7,12 @@
       name="description"
       content="Real3DMaker는 3D 파일 업로드, 출력 시뮬레이션 확인, 계좌이체 주문, 택배 또는 현장 수령까지 이어지는 3D 프린팅 주문 서비스입니다."
     />
-    <title>Real3DMaker | 3D 프린팅 주문</title>
-    <link rel="canonical" href="https://real3dmaker.com/" />
+    <title>Real3DMaker | 3D 파일 견적</title>
+    <link rel="canonical" href="https://real3dmaker.com/quote.html" />
     <meta name="robots" content="index, follow" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://real3dmaker.com/" />
-    <meta property="og:title" content="Real3DMaker | Bambu Lab FDM 3D Printing Studio" />
+    <meta property="og:url" content="https://real3dmaker.com/quote.html" />
+    <meta property="og:title" content="Real3DMaker | 3D 파일 견적" />
     <meta property="og:description" content="모델 파일만 있으면 출력 견적까지 바로." />
     <meta property="og:image" content="https://real3dmaker.com/assets/og-real3dmaker.png" />
     <meta property="og:image:width" content="1200" />
@@ -58,7 +58,7 @@
             "provider": { "@id": "https://real3dmaker.com/#business" },
             "serviceType": "3D Printing",
             "areaServed": "KR",
-            "description": "3D 파일 업로드 견적 화면, 모델 미리보기, 계좌이체 주문, 택배 또는 현장 수령 안내를 제공합니다.",
+            "description": "3D 파일 업로드, 모델 미리보기, 예상 견적 계산, 계좌이체 주문, 택배 또는 현장 수령 안내를 제공합니다.",
             "offers": {
               "@type": "Offer",
               "availability": "https://schema.org/InStock",
@@ -91,7 +91,8 @@
         <span>Real3DMaker</span>
       </a>
       <nav>
-        <a href="quote.html">견적</a>
+        <a href="index.html">홈</a>
+        <a href="#quote">견적</a>
         <a href="#simulator">시뮬레이션</a>
         <a href="#process">주문 흐름</a>
         <a href="order.html">주문하기</a>
@@ -112,9 +113,9 @@
             택배 또는 현장 수령 안내까지 한 흐름으로 처리합니다.
           </p>
           <div class="hero-actions">
-            <a href="quote.html" class="button primary">
+            <a href="#quote" class="button primary">
               <span aria-hidden="true">↧</span>
-              파일 업로드로 시작
+              견적 계산하기
             </a>
             <a href="order.html" class="button secondary">
               <span aria-hidden="true">→</span>
@@ -163,23 +164,164 @@
         </div>
       </section>
 
-      <section class="section quote-section landing-quote-cta" id="quote">
+      <section class="section quote-section" id="quote">
         <div class="section-heading quote-heading">
-          <p class="eyebrow">Start Your Order</p>
-          <h2>3D 파일을 올려 주문을 시작하세요.</h2>
+          <p class="eyebrow">Instant Estimate</p>
+          <h2>예상 견적 계산기</h2>
           <p>
-            견적 계산기는 별도 화면에서 열립니다. 파일을 올리고 미리보기와 출력 조건을 확인한 뒤 주문 페이지로 이어집니다.
+            파일과 출력 조건을 확인한 뒤 주문 페이지에서 입금 및 수령 정보를 확인합니다.
           </p>
         </div>
-        <div class="quote-cta-panel">
-          <div>
-            <strong>STL, 3MF, OBJ 파일 업로드</strong>
-            <span>모델 미리보기, 기본 출력 조건, 주문 정보를 한 번에 확인합니다.</span>
-          </div>
-          <a class="button primary" href="quote.html">
-            <span aria-hidden="true">→</span>
-            견적 화면 열기
-          </a>
+
+        <div class="quote-layout">
+          <form class="quote-form" id="quoteForm">
+            <label class="file-drop" for="modelFile" id="fileDrop">
+              <input id="modelFile" type="file" accept=".stl,.3mf,.step,.stp,.obj,.amf" />
+              <span class="file-icon" aria-hidden="true">▤</span>
+              <span class="file-title">파일을 올려 견적 계산</span>
+              <span class="file-copy">STL, 3MF, OBJ 파일은 바로 미리볼 수 있습니다. STEP 파일은 접수 후 확인합니다.</span>
+              <span class="file-button">파일 선택</span>
+            </label>
+            <div class="preview-actions">
+              <button type="button" id="samplePreview">샘플 보기</button>
+              <span>드래그로 회전, 휠로 확대/축소</span>
+            </div>
+
+            <div class="file-status" id="fileStatus" hidden>
+              <div>
+                <strong id="fileName">파일 미선택</strong>
+                <span id="fileMeta">파일을 올리면 확인 정보가 표시됩니다.</span>
+              </div>
+              <button type="button" id="clearFile">지우기</button>
+            </div>
+
+            <section class="model-preview" aria-label="3D 모델 미리보기">
+              <div class="model-preview-head">
+                <div>
+                  <span class="result-label">3D 미리보기</span>
+                  <strong id="modelPreviewTitle">파일을 올리거나 샘플을 열어보세요.</strong>
+                </div>
+              </div>
+              <p class="simulation-hint" id="simulationHint">
+                드래그 회전 · 휠 확대/축소
+              </p>
+              <div class="model-stage" id="modelStage">
+                <div class="viewport-topbar" aria-hidden="true">
+                  <span>플레이트 미리보기</span>
+                  <span>PLA · 0.20mm</span>
+                </div>
+                <div class="model-placeholder" id="modelPlaceholder">
+                  <span>▧</span>
+                  <strong>미리보기 대기</strong>
+                  <p>샘플을 보거나 3D 파일을 올려주세요.</p>
+                </div>
+                <div class="viewport-axis" aria-hidden="true">
+                  <span>Z</span>
+                  <span>X</span>
+                </div>
+                <div class="viewport-stats" id="viewportStats" aria-live="polite">
+                  <strong>모델 정보</strong>
+                  <span>파일을 올리면 크기와 형식이 표시됩니다.</span>
+                </div>
+              </div>
+              <div class="simulation-details" aria-label="파일 상세 정보">
+                <div><span>재료</span><strong id="detailMaterial">PLA</strong></div>
+                <div><span>무게</span><strong id="detailWeight">80g</strong></div>
+                <div><span>크기(XYZ)</span><strong id="detailSize">-</strong></div>
+                <div><span>예상 가격</span><strong id="detailPrice">-</strong></div>
+              </div>
+              <p class="model-preview-note" id="modelPreviewNote">
+                실제 출력 가능 여부는 주문 접수 후 최종 확인합니다.
+              </p>
+            </section>
+
+            <label>
+              소재
+              <select id="material">
+                <option value="pla">PLA - 기본 시제품</option>
+                <option value="petg">PETG - 내구/생활 파츠</option>
+              </select>
+            </label>
+
+            <div class="field-row">
+              <label>
+                예상 필라멘트
+                <span class="unit-field">
+                  <input id="weight" type="number" min="1" max="3000" value="80" />
+                  <span>g</span>
+                </span>
+              </label>
+              <label>
+                수량
+                <span class="unit-field">
+                  <input id="quantity" type="number" min="1" max="100" value="1" />
+                  <span>개</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <label>
+                출력 시간
+                <span class="unit-field">
+                  <input id="hours" type="number" min="1" max="200" value="6" />
+                  <span>시간</span>
+                </span>
+              </label>
+              <label>
+                최대 치수
+                <span class="unit-field">
+                  <input id="maxSize" type="number" min="10" max="300" value="120" />
+                  <span>mm</span>
+                </span>
+              </label>
+            </div>
+
+            <label>
+              적층 높이
+              <select id="layer">
+                <option value="standard">0.20mm 표준</option>
+                <option value="fine">0.12mm 정밀</option>
+                <option value="draft">0.28mm 빠른 출력</option>
+              </select>
+            </label>
+
+            <label>
+              후가공
+              <select id="finish">
+                <option value="none">서포트 제거만</option>
+                <option value="clean">기본 다듬기</option>
+                <option value="premium">표면 정리 집중</option>
+              </select>
+            </label>
+
+            <div class="toggle-grid">
+              <label class="check">
+                <input id="support" type="checkbox" checked />
+                <span>서포트 필요</span>
+              </label>
+              <label class="check">
+                <input id="multiColor" type="checkbox" />
+                <span>다색 출력</span>
+              </label>
+              <label class="check">
+                <input id="rush" type="checkbox" />
+                <span>빠른 납기</span>
+              </label>
+            </div>
+          </form>
+
+          <aside class="quote-result" aria-live="polite">
+            <span class="result-label">예상 금액</span>
+            <strong id="estimate">₩0</strong>
+            <p id="estimateNote">입력값을 기준으로 계산 중입니다.</p>
+            <div class="file-check" id="resultFileCheck">3D 파일을 올리면 파일 확인 상태가 여기에 표시됩니다.</div>
+            <div class="result-breakdown" id="breakdown"></div>
+            <a class="button primary wide" id="quoteMail" href="#contact">
+              <span aria-hidden="true">→</span>
+              이 조건으로 주문하기
+            </a>
+          </aside>
         </div>
       </section>
 

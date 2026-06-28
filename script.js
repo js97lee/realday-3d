@@ -1071,49 +1071,51 @@ function handleQuoteFormChange(event) {
   applyPreviewMode();
 }
 
-form.addEventListener("input", handleQuoteFormChange);
-form.addEventListener("change", handleQuoteFormChange);
-previewModeButtons.forEach((button) => {
-  button.addEventListener("click", () => setPreviewMode(button.dataset.previewMode));
-});
-modelFile.addEventListener("change", () => {
-  const [file] = modelFile.files;
-  if (file) {
-    inspectModelFile(file).catch(() => clearUploadedFile());
-    renderModelPreview(file);
-    requestSlicerEstimate(file);
-  }
-});
-clearFile.addEventListener("click", clearUploadedFile);
-samplePreview?.addEventListener("click", renderSamplePreview);
-quoteMail.addEventListener("click", savePreviewSnapshot);
-
-["dragenter", "dragover"].forEach((eventName) => {
-  fileDrop.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    fileDrop.classList.add("is-dragover");
+if (form) {
+  form.addEventListener("input", handleQuoteFormChange);
+  form.addEventListener("change", handleQuoteFormChange);
+  previewModeButtons.forEach((button) => {
+    button.addEventListener("click", () => setPreviewMode(button.dataset.previewMode));
   });
-});
-
-["dragleave", "drop"].forEach((eventName) => {
-  fileDrop.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    fileDrop.classList.remove("is-dragover");
-  });
-});
-
-fileDrop.addEventListener("drop", (event) => {
-  const [file] = event.dataTransfer.files;
-  if (file) {
-    try {
-      modelFile.files = event.dataTransfer.files;
-    } catch {
-      modelFile.value = "";
+  modelFile.addEventListener("change", () => {
+    const [file] = modelFile.files;
+    if (file) {
+      inspectModelFile(file).catch(() => clearUploadedFile());
+      renderModelPreview(file);
+      requestSlicerEstimate(file);
     }
-    inspectModelFile(file).catch(() => clearUploadedFile());
-    renderModelPreview(file);
-    requestSlicerEstimate(file);
-  }
-});
+  });
+  clearFile.addEventListener("click", clearUploadedFile);
+  samplePreview?.addEventListener("click", renderSamplePreview);
+  quoteMail.addEventListener("click", savePreviewSnapshot);
 
-calculate();
+  ["dragenter", "dragover"].forEach((eventName) => {
+    fileDrop.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      fileDrop.classList.add("is-dragover");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    fileDrop.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      fileDrop.classList.remove("is-dragover");
+    });
+  });
+
+  fileDrop.addEventListener("drop", (event) => {
+    const [file] = event.dataTransfer.files;
+    if (file) {
+      try {
+        modelFile.files = event.dataTransfer.files;
+      } catch {
+        modelFile.value = "";
+      }
+      inspectModelFile(file).catch(() => clearUploadedFile());
+      renderModelPreview(file);
+      requestSlicerEstimate(file);
+    }
+  });
+
+  calculate();
+}
