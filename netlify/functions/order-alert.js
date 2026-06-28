@@ -22,6 +22,10 @@ function printableFileLabel(order) {
   return "파일 미첨부";
 }
 
+function deliveryLabel(order) {
+  return [order?.deliveryAddress, order?.deliveryAddressDetail].map((value) => trim(value, "")).filter(Boolean).join(" ");
+}
+
 function buildTelegramMessage(order) {
   const statusUrl = `https://real3dmaker.com/order-status.html?orderId=${encodeURIComponent(trim(order?.orderId, ""))}`;
   const lines = [
@@ -35,6 +39,7 @@ function buildTelegramMessage(order) {
     `입금계좌: ${trim(order?.bankName)} ${trim(order?.bankAccountNumber)}`,
     `결제상태: ${trim(order?.paymentStatus, "입금 대기")}`,
     `수령: ${pickupLabel(order?.pickup)}`,
+    ...(order?.pickup === "DELIVERY" ? [`배송지: ${trim(deliveryLabel(order))}`] : []),
     `파일: ${trim(order?.fileName)}`,
     `파일크기: ${trim(order?.fileSizeText)}`,
     `소재: ${trim(order?.material)}`,

@@ -36,6 +36,8 @@ function publicOrder(order) {
     customerMobilePhone: maskPhone(order.customerMobilePhone),
     pickup: order.pickup,
     pickupLabel: pickupLabel(order.pickup),
+    deliveryAddress: order.deliveryAddress || "",
+    deliveryAddressDetail: order.deliveryAddressDetail || "",
     fileName: order.fileName,
     fileSizeText: order.fileSizeText || "-",
     material: order.material,

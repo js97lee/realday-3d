@@ -16,6 +16,10 @@ const bankQrImage = document.querySelector("#bankQrImage");
 const bankTransferBreakdown = document.querySelector("#bankTransferBreakdown");
 const bankTransferHelp = document.querySelector("#bankTransferHelp");
 const copyAccountButton = document.querySelector("#copyAccountButton");
+const deliveryFields = document.querySelector("#deliveryFields");
+const deliveryAddress = document.querySelector("#deliveryAddress");
+const deliveryAddressDetail = document.querySelector("#deliveryAddressDetail");
+const pickupMethodInputs = document.querySelectorAll('input[name="pickupMethod"]');
 
 const bankTransfer = {
   bankName: "카카오뱅크",
@@ -42,6 +46,16 @@ function parseEstimateAmount() {
 
 function cleanPhone(value) {
   return String(value || "").replace(/[^\d]/g, "").slice(0, 15);
+}
+
+function getPickupValue() {
+  return document.querySelector('input[name="pickupMethod"]:checked')?.value || "DELIVERY";
+}
+
+function syncDeliveryFields() {
+  const isDelivery = getPickupValue() === "DELIVERY";
+  deliveryFields.hidden = !isDelivery;
+  deliveryAddress.required = isDelivery;
 }
 
 function createOrderId() {
@@ -78,7 +92,9 @@ function buildOrderPayload(orderId) {
     support: param("support", "-"),
     multicolor: param("multicolor", "-"),
     rush: param("rush", "-"),
-    pickup: document.querySelector("#pickupMethod").value,
+    pickup: getPickupValue(),
+    deliveryAddress: deliveryAddress.value.trim(),
+    deliveryAddressDetail: deliveryAddressDetail.value.trim(),
     estimate: param("estimate", ""),
     paymentMethod: document.querySelector("#paymentMethod").value,
     paymentStatus: "입금 대기",
@@ -157,13 +173,19 @@ function renderBankTransfer(payload) {
   bankQrImage.src = qrImageUrl(payload);
   bankTransferCard.hidden = false;
   bankTransferHelp.textContent = "QR에는 송금에 필요한 주문번호, 계좌, 금액 정보가 들어 있습니다. 은행앱에서 금액과 계좌를 한 번 더 확인해주세요.";
-  bankTransferBreakdown.innerHTML = [
+  const rows = [
     ["입금은행", bankTransfer.bankName],
     ["입금계좌", bankTransfer.accountNumber],
     ["입금금액", `${formatter.format(payload.amount)}원`],
     ["입금자명", payload.customerName || "-"],
     ["수령", pickupLabel(payload.pickup)],
-  ]
+  ];
+
+  if (payload.pickup === "DELIVERY") {
+    rows.push(["배송지", [payload.deliveryAddress, payload.deliveryAddressDetail].filter(Boolean).join(" ") || "-"]);
+  }
+
+  bankTransferBreakdown.innerHTML = rows
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
     .join("");
 }
@@ -200,7 +222,7 @@ function setInitialSummary() {
     ["적층", param("layer")],
     ["서포트", param("support")],
     ["다색 출력", param("multicolor")],
-    ["수령", "택배 또는 현장 수령"],
+    ["수령", pickupLabel(getPickupValue())],
     ["결제", "카카오뱅크 계좌이체"],
   ]
     .map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`)
@@ -213,10 +235,10 @@ function setInitialSummary() {
 
 function updateSimulation(file, fromQuote = false) {
   simulationPanel.classList.add("is-ready");
-  simulationPanel.querySelector("strong").textContent = "출력 시뮬레이션 자동 생성됨";
+  simulationPanel.querySelector("strong").textContent = "파일 첨부 확인됨";
   simulationPanel.querySelector("span").textContent = fromQuote
-    ? `${file.name} · 견적 조건 기반 자동 확인`
-    : `${formatFile(file)} · 업로드 파일 기반 자동 확인`;
+    ? `${file.name} · 견적 조건을 이어받았습니다.`
+    : `${formatFile(file)} · 주문 파일로 접수됩니다.`;
 }
 
 orderModelFile.addEventListener("change", () => {
@@ -237,6 +259,13 @@ copyAccountButton.addEventListener("click", async () => {
   } catch {
     paymentNotice.textContent = `계좌번호: ${bankTransfer.accountNumber}`;
   }
+});
+
+pickupMethodInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    syncDeliveryFields();
+    setInitialSummary();
+  });
 });
 
 orderForm.addEventListener("submit", async (event) => {
@@ -270,3 +299,4 @@ orderForm.addEventListener("submit", async (event) => {
 });
 
 setInitialSummary();
+syncDeliveryFields();

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Real3DMaker 3D 프린팅 주문 페이지입니다. 파일, 시뮬레이션, 카카오뱅크 계좌이체, 택배 또는 현장 수령 정보를 확인합니다."
+      content="Real3DMaker 3D 프린팅 주문 페이지입니다. 견적 조건, 주문자 정보, 배송 정보, 카카오뱅크 계좌이체 안내를 확인합니다."
     />
     <title>Real3DMaker | 주문하기</title>
     <link rel="canonical" href="https://real3dmaker.com/order.html" />
@@ -46,10 +46,10 @@
       <section class="section order-hero">
         <div class="section-heading">
           <p class="eyebrow">Order Checkout</p>
-          <h1>파일 확인 후 계좌이체로 주문.</h1>
+          <h1>배송 정보 확인 후 주문번호를 만듭니다.</h1>
           <p>
-            3D 파일을 올리면 출력 시뮬레이션이 자동 생성됩니다. 예상 결과를 확인하고
-            주문번호와 입금 계좌를 확인한 뒤 송금하면 출력 대기열에 접수됩니다.
+            견적 조건을 확인했다면 이름, 연락처, 수령 방법만 입력하세요.
+            주문번호 생성 후 카카오뱅크 계좌와 송금 QR이 표시됩니다.
           </p>
         </div>
       </section>
@@ -57,88 +57,99 @@
       <section class="section order-section">
         <div class="order-layout">
           <form class="quote-form order-form" id="orderForm">
-            <div class="order-step">
-              <span>1</span>
+            <div class="order-step compact-step">
               <div>
-                <h2>3D 파일</h2>
-                <p>메인 견적기에서 넘어온 파일명과 조건을 확인하고, 실제 출력할 최종 파일을 선택합니다.</p>
-              </div>
-            </div>
-
-            <div class="file-status always-visible">
-              <div>
-                <strong id="orderFileName">파일 미업로드</strong>
-                <span id="orderEstimateMeta">견적 페이지에서 조건을 넘기면 여기에 표시됩니다.</span>
-              </div>
-            </div>
-
-            <label class="file-drop" for="orderModelFile">
-              <input id="orderModelFile" type="file" accept=".stl,.3mf,.step,.stp,.obj,.amf" />
-              <span class="file-icon" aria-hidden="true">▤</span>
-              <span class="file-title">주문 파일 첨부</span>
-              <span class="file-copy">파일을 선택하면 아래 출력 시뮬레이션 상태가 자동으로 갱신됩니다.</span>
-              <span class="file-button">파일 선택</span>
-            </label>
-
-            <div class="order-step" id="simulation">
-              <span>2</span>
-              <div>
-                <h2>출력 시뮬레이션</h2>
-                <p>별도 파일을 올릴 필요 없이, 업로드한 3D 파일과 견적 조건을 기준으로 자동 확인합니다.</p>
-              </div>
-            </div>
-
-            <div class="simulation-panel" id="simulationPanel">
-              <div>
-                <strong>자동 시뮬레이션 대기</strong>
-                <span>3D 파일을 선택하면 출력 조건 확인 상태가 표시됩니다.</span>
-              </div>
-              <div class="simulation-bars" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-
-            <div class="order-step">
-              <span>3</span>
-              <div>
-                <h2>주문 및 입금 정보</h2>
-                <p>주문번호를 만든 뒤 카카오뱅크 계좌로 견적 금액을 입금합니다.</p>
+                <h2>주문자 정보</h2>
+                <p>제작 가능 여부와 입금 확인 안내를 받을 연락처를 입력합니다.</p>
               </div>
             </div>
 
             <div class="field-row">
               <label>
                 이름
-                <input id="customerName" type="text" placeholder="주문자명" required />
+                <input id="customerName" type="text" placeholder="주문자명" autocomplete="name" required />
               </label>
               <label>
                 연락처
-                <input id="customerPhone" type="tel" placeholder="연락 가능한 번호" required />
+                <input id="customerPhone" type="tel" placeholder="01012345678" autocomplete="tel" required />
               </label>
             </div>
 
-            <label>
-              결제 방식
-              <select id="paymentMethod">
-                <option value="BANK_TRANSFER">카카오뱅크 계좌이체</option>
-              </select>
+            <div class="order-step compact-step">
+              <div>
+                <h2>출력 파일</h2>
+                <p>견적에서 사용한 파일이 맞는지 확인하고, 최종 제작 파일을 첨부합니다.</p>
+              </div>
+            </div>
+
+            <div class="file-status always-visible checkout-file-summary">
+              <div>
+                <strong id="orderFileName">파일 미업로드</strong>
+                <span id="orderEstimateMeta">견적 페이지에서 조건을 넘기면 여기에 표시됩니다.</span>
+              </div>
+            </div>
+
+            <label class="file-drop checkout-file-drop" for="orderModelFile">
+              <input id="orderModelFile" type="file" accept=".stl,.3mf,.step,.stp,.obj,.amf" />
+              <span class="file-icon" aria-hidden="true">▤</span>
+              <span class="file-title">최종 3D 파일 첨부</span>
+              <span class="file-copy">STL, 3MF, OBJ, STEP 파일을 첨부해주세요.</span>
+              <span class="file-button">파일 선택</span>
             </label>
+
+            <div class="simulation-panel compact-simulation" id="simulationPanel">
+              <div>
+                <strong>파일 확인 대기</strong>
+                <span>파일을 첨부하면 주문 알림에 함께 기록됩니다.</span>
+              </div>
+            </div>
+
+            <div class="order-step compact-step">
+              <div>
+                <h2>수령 방법</h2>
+                <p>택배 수령은 주소를 남겨주세요. 현장 수령은 제작 완료 후 개별 안내합니다.</p>
+              </div>
+            </div>
+
+            <div class="pickup-options" aria-label="수령 방식">
+              <label class="pickup-option">
+                <input type="radio" name="pickupMethod" value="DELIVERY" checked />
+                <span>
+                  <strong>택배 수령</strong>
+                  <small>제작 완료 후 입력 주소로 발송</small>
+                </span>
+              </label>
+              <label class="pickup-option">
+                <input type="radio" name="pickupMethod" value="ONSITE" />
+                <span>
+                  <strong>현장 수령</strong>
+                  <small>서울 광진구, 완료 후 일정 안내</small>
+                </span>
+              </label>
+            </div>
+
+            <div class="delivery-fields" id="deliveryFields">
+              <label>
+                배송 주소
+                <input id="deliveryAddress" type="text" placeholder="도로명 주소" autocomplete="street-address" required />
+              </label>
+              <label>
+                상세 주소
+                <input id="deliveryAddressDetail" type="text" placeholder="동/호수, 공동현관 메모 등" />
+              </label>
+            </div>
+
+            <input id="paymentMethod" type="hidden" value="BANK_TRANSFER" />
 
             <label>
               입금자명 또는 요청사항
-              <input id="paymentMemo" type="text" placeholder="입금자명 또는 요청사항" />
+              <input id="paymentMemo" type="text" placeholder="입금자명이 다르거나 요청사항이 있으면 적어주세요." />
             </label>
 
-            <label>
-              수령 방식
-              <select id="pickupMethod">
-                <option value="DELIVERY">택배 수령</option>
-                <option value="ONSITE">현장 수령</option>
-              </select>
-            </label>
+            <div class="payment-method-note">
+              <strong>결제는 계좌이체로 진행됩니다.</strong>
+              <span>주문번호를 만들면 오른쪽에 카카오뱅크 계좌와 송금 QR이 표시됩니다.</span>
+            </div>
 
             <label class="check">
               <input id="policyAgree" type="checkbox" required />

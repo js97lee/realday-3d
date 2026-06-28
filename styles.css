@@ -960,6 +960,11 @@ select:focus {
   padding-bottom: 4px;
 }
 
+.order-step.compact-step {
+  display: block;
+  padding-top: 8px;
+}
+
 .order-step > span {
   display: grid;
   width: 34px;
@@ -980,6 +985,14 @@ select:focus {
   display: flex;
 }
 
+.checkout-file-summary {
+  margin-top: -4px;
+}
+
+.checkout-file-drop {
+  min-height: 86px;
+}
+
 .simulation-panel {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -990,6 +1003,10 @@ select:focus {
   background: #050914;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.compact-simulation {
+  min-height: 72px;
 }
 
 .simulation-panel strong,
@@ -1043,6 +1060,72 @@ select:focus {
   margin-top: 24px;
   padding-top: 22px;
   border-top: 1px solid var(--line);
+}
+
+.pickup-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pickup-option {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+  min-height: 96px;
+  padding: 16px;
+  background: #050914;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pickup-option:has(input:checked) {
+  background: rgba(36, 107, 254, 0.14);
+  border-color: rgba(142, 198, 255, 0.55);
+}
+
+.pickup-option input {
+  width: 18px;
+  min-height: 18px;
+  margin-top: 3px;
+  accent-color: var(--blue);
+}
+
+.pickup-option strong,
+.pickup-option small {
+  display: block;
+}
+
+.pickup-option small {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.delivery-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.delivery-fields[hidden] {
+  display: none;
+}
+
+.payment-method-note {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  background: rgba(36, 107, 254, 0.12);
+  border: 1px solid rgba(14, 165, 255, 0.28);
+  border-radius: 8px;
+}
+
+.payment-method-note span {
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .qr-box {
@@ -1306,6 +1389,7 @@ footer strong {
 
   .field-row,
   .toggle-grid,
+  .pickup-options,
   .machine-table div,
   .file-drop {
     grid-template-columns: 1fr;

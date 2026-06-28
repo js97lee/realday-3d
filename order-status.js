@@ -39,7 +39,7 @@ function renderOrder(order) {
   statusBadge.hidden = false;
   statusCurrent.textContent = order.status || "입금 대기";
 
-  statusBreakdown.innerHTML = [
+  const rows = [
     ["접수일", formatDate(order.createdAt)],
     ["업데이트", formatDate(order.updatedAt)],
     ["입금상태", order.paymentStatus || "입금 대기"],
@@ -48,6 +48,9 @@ function renderOrder(order) {
     ["주문자", order.customerName || "-"],
     ["연락처", order.customerMobilePhone || "-"],
     ["수령", order.pickupLabel || "-"],
+    ...(order.pickup === "DELIVERY"
+      ? [["배송지", [order.deliveryAddress, order.deliveryAddressDetail].filter(Boolean).join(" ") || "-"]]
+      : []),
     ["파일", order.fileName || "-"],
     ["파일크기", order.fileSizeText || "-"],
     ["소재", order.material || "-"],
@@ -59,7 +62,9 @@ function renderOrder(order) {
     ["다색출력", order.multicolor || "-"],
     ["후가공", order.finish || "-"],
     ["메모", order.memo || "-"],
-  ]
+  ];
+
+  statusBreakdown.innerHTML = rows
     .map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`)
     .join("");
 }
