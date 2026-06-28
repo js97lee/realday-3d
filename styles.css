@@ -52,19 +52,13 @@ a {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 800;
+  flex: 0 0 auto;
 }
 
-.brand-mark {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  background: var(--blue);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  font-size: 13px;
+.brand-logo {
+  display: block;
+  width: 186px;
+  height: auto;
 }
 
 nav {
@@ -1253,6 +1247,10 @@ footer strong {
 @media (max-width: 900px) {
   .site-header {
     padding: 0 20px;
+  }
+
+  .brand-logo {
+    width: 158px;
   }
 
   nav {
