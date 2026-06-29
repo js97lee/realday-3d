@@ -57,7 +57,7 @@ a {
 
 .brand-logo {
   display: block;
-  width: 124px;
+  width: 104px;
   height: auto;
 }
 
@@ -1318,6 +1318,14 @@ footer strong {
   color: var(--white);
 }
 
+.footer-brand-name {
+  margin-top: 2px;
+  color: rgba(148, 163, 184, 0.78);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
 .footer-info {
   display: flex;
   flex-wrap: wrap;
@@ -1333,7 +1341,7 @@ footer strong {
   }
 
   .brand-logo {
-    width: 108px;
+    width: 92px;
   }
 
   nav {
