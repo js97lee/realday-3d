@@ -17,7 +17,9 @@ function trim(value, fallback = "-") {
 
 function printableFileLabel(order) {
   if (order?.driveFileUrl) return order.driveFileUrl;
+  if (order?.modelFileDownloadUrl) return order.modelFileDownloadUrl;
   if (order?.modelFileStatus === "attached") return "주문 파일 첨부됨";
+  if (order?.modelFileStatus === "stored") return "주문 파일 저장됨";
   if (order?.modelFileStatus === "too-large-for-inline-upload") return "파일이 커서 별도 확인 필요";
   return "파일 미첨부";
 }
@@ -121,6 +123,53 @@ function stripPrivateFields(order) {
   return storedOrder;
 }
 
+function sanitizeFileName(name) {
+  return String(name || "model").replace(/[\\/:*?"<>|]/g, "_").slice(0, 180);
+}
+
+function buildSiteUrl(event) {
+  const host = event.headers.host || event.headers.Host || "real3dmaker.com";
+  const proto = event.headers["x-forwarded-proto"] || "https";
+  return `${proto}://${host}`;
+}
+
+async function saveModelFileToBlob(order, event) {
+  if (!order?.modelFileDataUrl || order.modelFileStatus !== "attached") {
+    return order;
+  }
+
+  const match = String(order.modelFileDataUrl).match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) {
+    return order;
+  }
+
+  connectLambda(event);
+  const mimeType = match[1] || order.modelFileMimeType || "application/octet-stream";
+  const bytes = Buffer.from(match[2], "base64");
+  const safeName = sanitizeFileName(order.modelFileName || order.fileName || "model");
+  const key = `${sanitizeFileName(order.orderId)}/${safeName}`;
+  const fileStore = getStore("real3dmaker-order-files");
+
+  await fileStore.set(key, bytes, {
+    metadata: {
+      orderId: order.orderId,
+      fileName: safeName,
+      mimeType,
+      size: bytes.length,
+      createdAt: new Date().toISOString(),
+    },
+  });
+
+  const downloadUrl = `${buildSiteUrl(event)}/.netlify/functions/order-file?key=${encodeURIComponent(key)}`;
+  order.modelFileStatus = "stored";
+  order.modelFileBlobKey = key;
+  order.modelFileDownloadUrl = downloadUrl;
+  order.driveFileUrl = downloadUrl;
+  order.modelFileSize = bytes.length;
+  order.modelFileSizeText = order.fileSizeText || `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  return order;
+}
+
 async function saveOrder(order, event) {
   connectLambda(event);
   const store = getStore("real3dmaker-orders");
@@ -195,6 +244,7 @@ exports.handler = async (event) => {
     let stored = false;
     let status = order.status || "입금 대기";
     try {
+      await saveModelFileToBlob(order, event);
       const googleSync = await syncGoogleWorkspace(order);
       if (googleSync.ok) {
         order.sheetStatus = "google-sheets-recorded";
