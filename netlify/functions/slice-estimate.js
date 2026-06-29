@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     return json(202, {
       ok: false,
       mode: "browser-estimate",
-      message: "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산합니다.",
+      message: "서버 슬라이서가 아직 연결되지 않아 브라우저 모델 확인과 선택 조건 기준 사전 견적을 사용합니다.",
     });
   }
 

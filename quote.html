@@ -129,10 +129,10 @@
               <button type="button" id="clearFile">지우기</button>
             </div>
 
-            <section class="model-preview" aria-label="3D 모델 미리보기">
+            <section class="model-preview" aria-label="3D 모델 확인">
               <div class="model-preview-head">
                 <div>
-                  <span class="result-label">3D 미리보기</span>
+                  <span class="result-label">모델 확인</span>
                   <strong id="modelPreviewTitle">파일을 올리거나 샘플을 열어보세요.</strong>
                 </div>
               </div>
@@ -146,7 +146,7 @@
                 </div>
                 <div class="model-placeholder" id="modelPlaceholder">
                   <span>▧</span>
-                  <strong>미리보기 대기</strong>
+                  <strong>모델 대기</strong>
                   <p>샘플을 보거나 3D 파일을 올려주세요.</p>
                 </div>
                 <div class="viewport-axis" aria-hidden="true">
@@ -167,6 +167,11 @@
               <p class="model-preview-note" id="modelPreviewNote">
                 실제 출력 가능 여부는 주문 접수 후 최종 확인합니다.
               </p>
+              <div class="slicer-status is-pending" id="slicerStatus" aria-live="polite">
+                <span>슬라이서 분석</span>
+                <strong>파일 업로드 대기</strong>
+                <p>파일을 올리면 브라우저에서 모델을 확인하고, 서버 슬라이서가 연결된 경우 정밀 견적을 반영합니다.</p>
+              </div>
             </section>
 
             <label>

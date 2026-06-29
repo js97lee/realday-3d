@@ -218,9 +218,9 @@ function applySlicerQuote(data) {
 
   setSlicerStatus(
     "is-ready",
-    "Bambu 슬라이싱 견적 반영됨",
+    "슬라이서 견적 반영됨",
     applied.length
-      ? `실제 슬라이싱 결과 기준으로 ${applied.join(", ")} 정보를 견적에 반영했습니다.`
+      ? `서버 슬라이싱 결과 기준으로 ${applied.join(", ")} 정보를 견적에 반영했습니다.`
       : "슬라이서 워커 응답을 받았습니다. 상세 값은 결과 JSON 형식에 맞춰 추가 반영할 수 있습니다."
   );
 }
@@ -228,7 +228,7 @@ function applySlicerQuote(data) {
 async function requestSlicerEstimate(file) {
   const requestId = (slicerRequestId += 1);
   activeSlicerQuote = null;
-  setSlicerStatus("is-loading", "Bambu 슬라이싱 요청 중", "파일과 출력 조건을 서버 슬라이서 워커로 전달하고 있습니다.");
+  setSlicerStatus("is-loading", "슬라이서 분석 확인 중", "파일과 출력 조건을 서버 슬라이서 워커로 전달하고 있습니다.");
 
   const formData = new FormData();
   formData.append("model", file, file.name);
@@ -249,8 +249,8 @@ async function requestSlicerEstimate(file) {
     if (response.status === 202 || data?.mode === "browser-estimate") {
       setSlicerStatus(
         "is-pending",
-        "예상 견적 계산 완료",
-        data?.message || "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산했습니다."
+        "브라우저 견적 사용 중",
+        data?.message || "서버 슬라이서가 연결되지 않아 업로드 파일과 선택 조건 기준으로 사전 견적을 계산합니다."
       );
       return;
     }
@@ -264,8 +264,8 @@ async function requestSlicerEstimate(file) {
     if (requestId !== slicerRequestId) return;
     setSlicerStatus(
       "is-error",
-      "예상 견적 계산 중",
-      "업로드 파일과 선택한 출력 조건을 기준으로 예상 견적을 계산합니다."
+      "슬라이서 분석 미연결",
+      "현재는 브라우저에서 모델을 확인하고 선택 조건 기준으로 사전 견적을 계산합니다."
     );
   }
 }
@@ -453,37 +453,6 @@ function preparePreviewObject(THREE, object) {
   return object;
 }
 
-function makeSupportPreview(THREE, object) {
-  const box = new THREE.Box3().setFromObject(object);
-  const size = box.getSize(new THREE.Vector3());
-  const min = box.min;
-  const group = new THREE.Group();
-  const supportMaterial = new THREE.MeshStandardMaterial({
-    color: 0x246bfe,
-    transparent: true,
-    opacity: 0.5,
-    roughness: 0.7,
-  });
-
-  const radius = Math.max(1.6, Math.min(size.x, size.y) / 28);
-  const height = Math.max(6, size.z * 0.72);
-  const positions = [
-    [min.x + size.x * 0.28, min.y + size.y * 0.28],
-    [min.x + size.x * 0.62, min.y + size.y * 0.45],
-    [min.x + size.x * 0.45, min.y + size.y * 0.68],
-  ];
-
-  positions.forEach(([x, y]) => {
-    const geometry = new THREE.CylinderGeometry(radius, radius * 0.72, height, 8);
-    const support = new THREE.Mesh(geometry, supportMaterial);
-    support.rotation.x = Math.PI / 2;
-    support.position.set(x, y, height / 2);
-    group.add(support);
-  });
-
-  return group;
-}
-
 function makeFallbackPreviewObject(THREE) {
   const group = new THREE.Group();
   const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -632,13 +601,7 @@ function applyPreviewMode() {
       });
     }
   });
-  if (modelViewer.supportGroup) {
-    modelViewer.supportGroup.visible = previewMode === "print" && valueOf("support");
-  }
-  simulationHint.textContent =
-    previewMode === "print"
-      ? "서포트 예상 형태를 함께 표시합니다."
-      : "드래그 회전 · 휠 확대/축소";
+  simulationHint.textContent = "드래그 회전 · 휠 확대/축소";
 }
 
 function savePreviewSnapshot() {
@@ -757,8 +720,6 @@ async function renderModelPreview(file) {
     object = normalized.object;
     scene.add(object);
     fitObjectToView(THREE, object, camera, controls);
-    const supportGroup = makeSupportPreview(THREE, object);
-    scene.add(supportGroup);
     modelPlaceholder.hidden = true;
 
     const resize = () => {
@@ -776,14 +737,14 @@ async function renderModelPreview(file) {
       modelViewer.frame = requestAnimationFrame(animate);
     };
 
-    modelViewer = { THREE, scene, renderer, controls, resize, frame: 0, object, supportGroup };
+    modelViewer = { THREE, scene, renderer, controls, resize, frame: 0, object, supportGroup: null };
     applyPreviewMode();
     window.addEventListener("resize", resize);
     animate();
     setPreviewStatus(
       file.name,
       fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
-        ? "파일은 접수됐고, 대체 출력 시뮬레이션을 표시합니다."
+        ? "파일은 접수됐고, 기본 모델 확인 화면을 표시합니다."
         : "미리보기 준비 완료",
       fallback || !["stl", "obj", "3mf", "amf"].includes(extension)
         ? "정확한 형상은 주문 접수 후 확인합니다."
@@ -928,12 +889,12 @@ function clearUploadedFile() {
   setPreviewStatus(
     "파일을 올리거나 샘플을 열어보세요.",
     "드래그 회전 · 휠 확대/축소",
-    "실제 출력 가능 여부는 주문 접수 후 최종 확인합니다."
+    "서포트와 출력 시간은 슬라이서 분석 연결 후 정밀 확인합니다."
   );
   setSlicerStatus(
     "is-pending",
     "파일 업로드 대기",
-    "파일을 올리면 예상 견적을 계산합니다."
+    "파일을 올리면 브라우저에서 모델을 확인하고, 서버 슬라이서가 연결된 경우 정밀 견적을 반영합니다."
   );
   calculate();
 }
@@ -1002,7 +963,7 @@ function calculate() {
   detailPrice.textContent = formatter.format(finalTotal);
   note.textContent =
     activeSlicerQuote?.total && activeSlicerQuote.total > 0
-      ? "Bambu 슬라이싱 워커가 내려준 총액을 반영한 사전 견적입니다."
+      ? "서버 슬라이서가 내려준 총액을 반영한 사전 견적입니다."
       : maxSize > 256
       ? "256mm를 넘는 모델은 분할 출력 검토가 필요합니다."
       : "업로드 파일과 출력 조건을 기준으로 계산한 사전 견적입니다.";
